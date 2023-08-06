@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,7 +31,10 @@ public class GPSStickyService extends Service {
                 }
         ).start();
 
-        startForeground(1001, SetNotification().build());
+        //startForeground(1001, SetNotification().build() );
+
+        startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
+
 
         return super.onStartCommand(intent, flags, startId);
     }
