@@ -32,15 +32,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Whitelist the restricted permissions.
-        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(MODE_FULL_INSTALL);
-        params.setWhitelistedRestrictedPermissions(new HashSet<>(Arrays.asList("ACCESS_BACKGROUND_LOCATION")));
-
-        PackageInstaller installer = getPackageManager().getPackageInstaller();
-        try {
-            int sessionId = installer.createSession(params);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(MODE_FULL_INSTALL);
+//        params.setWhitelistedRestrictedPermissions(new HashSet<>(Arrays.asList("ACCESS_BACKGROUND_LOCATION")));
+//
+//        PackageInstaller installer = getPackageManager().getPackageInstaller();
+//        try {
+//            int sessionId = installer.createSession(params);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         serviceIntent = new Intent(this, GPSStickyService.class);
 
         //startForegroundService(serviceIntent);
