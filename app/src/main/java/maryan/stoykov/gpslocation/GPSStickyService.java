@@ -7,6 +7,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -15,27 +17,39 @@ import androidx.annotation.Nullable;
 public class GPSStickyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            Log.e ("Service", "Service is running");
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }
-        ).start();
+
+       // GpsProvider gpsProvider = new GpsProvider(getApplicationContext());
+        GPSListener gpsListener = new GPSListener((getApplicationContext()));
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("SERVICE", "Service is running");
+                gpsListener.requestLocation();
+                handler.postDelayed(this,2000);
+            }
+        },2000);
+//        new Thread(
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        while (true) {
+//                            Log.e ("Service", "Service is running");
+//                            try {
+//                                Thread.sleep(10000);
+//                                Location location = gpsProvider.getLocation();
+//                                Log.e("lat: ", String.valueOf(location.getLatitude()));
+//                                Log.e("long: ",String.valueOf(location.getLongitude()));
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }
+//                }
+//        ).start();
 
         //startForeground(1001, SetNotification().build() );
-
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
-
-
         return super.onStartCommand(intent, flags, startId);
     }
 
