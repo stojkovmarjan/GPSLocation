@@ -19,22 +19,26 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 
 public class GPSListener implements LocationListener {
-    Double latitude;
-    Double longitude;
-    protected Context context;
+    Context context;
     LocationManager locationManager;
+    Location location;
 
-    public GPSListener (Context context){
+    GPSListenerOnChange gpsListenerOnChange;
+    public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        this.gpsListenerOnChange = gpsListenerOnChange;
     }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        Log.e("LOCATION:", location.getLatitude() + "," + location.getLongitude());
+        //Log.e("LOCATION:", location.getLatitude() + "," + location.getLongitude());
+        this.location = location;
+        gpsListenerOnChange.onLocationSubmit(location);
     }
 
     protected void requestLocation() {
+
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED
@@ -52,7 +56,14 @@ public class GPSListener implements LocationListener {
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000l, 10f, this);
 
+        } else {
+            Log.e("LOCATION:", "GPS NOT ENABLED!");
         }
+
+    }
+
+    public Location getLocation(){
+        return this.location;
     }
 
 

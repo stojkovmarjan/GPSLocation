@@ -14,12 +14,13 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-public class GPSStickyService extends Service {
+public class GPSStickyService extends Service implements  GPSListenerOnChange{
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
        // GpsProvider gpsProvider = new GpsProvider(getApplicationContext());
-        GPSListener gpsListener = new GPSListener((getApplicationContext()));
+        GPSListener gpsListener = new GPSListener(getApplicationContext(), this);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -29,26 +30,7 @@ public class GPSStickyService extends Service {
                 handler.postDelayed(this,2000);
             }
         },2000);
-//        new Thread(
-//                new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        while (true) {
-//                            Log.e ("Service", "Service is running");
-//                            try {
-//                                Thread.sleep(10000);
-//                                Location location = gpsProvider.getLocation();
-//                                Log.e("lat: ", String.valueOf(location.getLatitude()));
-//                                Log.e("long: ",String.valueOf(location.getLongitude()));
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    }
-//                }
-//        ).start();
 
-        //startForeground(1001, SetNotification().build() );
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         return super.onStartCommand(intent, flags, startId);
     }
@@ -76,5 +58,10 @@ public class GPSStickyService extends Service {
                 .setSmallIcon(R.drawable.ic_launcher_background);
 
         return notification;
+    }
+
+    @Override
+    public void onLocationSubmit(Location location) {
+        Log.e("Location changed", location.getLatitude()+", "+location.getLongitude());
     }
 }
