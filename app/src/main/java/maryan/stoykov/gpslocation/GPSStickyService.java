@@ -19,7 +19,6 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-       // GpsProvider gpsProvider = new GpsProvider(getApplicationContext());
         GPSListener gpsListener = new GPSListener(getApplicationContext(), this);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -60,6 +59,10 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         return notification;
     }
 
+    /**
+     * listens to location changes in GPSListener
+     * @param location
+     */
     @Override
     public void onLocationSubmit(Location location) {
         Log.e("Location changed", location.getLatitude()+", "+location.getLongitude());

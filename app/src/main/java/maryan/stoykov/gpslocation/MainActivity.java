@@ -13,7 +13,10 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.Manifest;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -26,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     final int REQUEST_PERMISSIONS_CODE = 1234;
     final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
     Intent serviceIntent;
+    Button btnStart;
+    Button btnStop;
+    Button btnAbout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +47,32 @@ public class MainActivity extends AppCompatActivity {
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }
+        btnStart = findViewById(R.id.btnStart);
+        btnStop = findViewById(R.id.btnStop);
+        btnAbout = findViewById(R.id.btnAbout);
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        btnAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+                Toast.makeText( MainActivity.this, deviceId, Toast.LENGTH_LONG).show();
+            }
+        });
+
         serviceIntent = new Intent(this, GPSStickyService.class);
 
         //startForegroundService(serviceIntent);

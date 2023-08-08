@@ -22,19 +22,23 @@ public class GPSListener implements LocationListener {
     Context context;
     LocationManager locationManager;
     Location location;
-
-    GPSListenerOnChange gpsListenerOnChange;
+    GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
+
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-        this.gpsListenerOnChange = gpsListenerOnChange;
+
+        this.gpsListenerOnChange = gpsListenerOnChange; //
+
     }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
         //Log.e("LOCATION:", location.getLatitude() + "," + location.getLongitude());
         this.location = location;
-        gpsListenerOnChange.onLocationSubmit(location);
+
+        gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+
     }
 
     protected void requestLocation() {
