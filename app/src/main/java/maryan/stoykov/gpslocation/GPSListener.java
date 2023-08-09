@@ -7,17 +7,15 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.gms.location.LocationServices;
-
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogRecord;
-
+/**
+ * provides the main service with location data
+ * taken from the GPS sensor
+ */
 public class GPSListener implements LocationListener {
     Context context;
     LocationManager locationManager;
@@ -26,21 +24,25 @@ public class GPSListener implements LocationListener {
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         this.context = context;
+
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
-        this.gpsListenerOnChange = gpsListenerOnChange; //
+        this.gpsListenerOnChange = gpsListenerOnChange; // event emitter / listener
 
     }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        //Log.e("LOCATION:", location.getLatitude() + "," + location.getLongitude());
+
         this.location = location;
 
         gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
 
     }
 
+    /**
+     * Location update method
+     */
     protected void requestLocation() {
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -58,7 +60,7 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000l, 10f, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000l, 10f, this);
 
         } else {
             Log.e("LOCATION:", "GPS NOT ENABLED!");

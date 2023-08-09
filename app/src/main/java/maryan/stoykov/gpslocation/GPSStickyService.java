@@ -26,11 +26,12 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
             public void run() {
                 Log.e("SERVICE", "Service is running");
                 gpsListener.requestLocation();
-                handler.postDelayed(this,2000);
+                handler.postDelayed(this,1000*60*1);
             }
         },2000);
 
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -60,11 +61,15 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     }
 
     /**
-     * listens to location changes in GPSListener
+     * listens to location changes in GPSListener class
      * @param location
      */
     @Override
     public void onLocationSubmit(Location location) {
-        Log.e("Location changed", location.getLatitude()+", "+location.getLongitude());
+        Log.e(
+                "Location changed", location.getLatitude()+", "
+                        +location.getLongitude()+","
+                        +location.getAccuracy()
+        );
     }
 }
