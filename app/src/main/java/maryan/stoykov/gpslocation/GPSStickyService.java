@@ -140,6 +140,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         sendPost(location);
     }
 
+    // TODO: Move this method to a separate class
     public void sendPost(Location location) {
 
         @SuppressLint("HardwareIds")
