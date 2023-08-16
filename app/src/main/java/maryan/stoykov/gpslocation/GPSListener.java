@@ -82,4 +82,8 @@ public class GPSListener implements LocationListener {
     public void onProviderDisabled(@NonNull String provider) {
         LocationListener.super.onProviderDisabled(provider);
     }
+
+    public void stopLocationUpdate(){
+        locationManager.removeUpdates(this);
+    }
 }

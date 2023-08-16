@@ -2,12 +2,15 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL;
 
+import static androidx.core.app.ServiceCompat.stopForeground;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -51,37 +54,42 @@ public class MainActivity extends AppCompatActivity {
         btnStop = findViewById(R.id.btnStop);
         btnAbout = findViewById(R.id.btnAbout);
 
+        askForPermissions();
+
+
+
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+                if (checkPermissions()){
+                    startForegroundService(serviceIntent);
+                } else {
+                    askForPermissions();
+                }
             }
         });
 
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                serviceIntent.putExtra("SIGNAL","STOP");
+                startForegroundService(serviceIntent);
+               //stopService(serviceIntent);
             }
         });
 
         btnAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                @SuppressLint("HardwareIds")
                 String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
                 Toast.makeText( MainActivity.this, deviceId, Toast.LENGTH_LONG).show();
             }
         });
 
-        serviceIntent = new Intent(this, GPSStickyService.class);
 
-        //startForegroundService(serviceIntent);
-
-        if (checkPermissions()){
-            startForegroundService(serviceIntent);
-        } else {
-            askForPermissions();
-        }
+        //startForegroundService(serviceIntent)
 
     }
 
@@ -91,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.RECEIVE_BOOT_COMPLETED,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                 Manifest.permission.INTERNET
         };
 
@@ -113,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.RECEIVE_BOOT_COMPLETED,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                 Manifest.permission.INTERNET
         };
 
@@ -124,7 +132,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         Log.e ("GRANT: ", "onReqPer");
+
         if (requestCode == REQUEST_PERMISSIONS_CODE) {
             if ( grantResults.length > 0 ) {
                 // Permission granted, proceed with using location services
@@ -163,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e("ACCESS_BACKGROUND_LOCATION", "HIT");
             Log.e("ACCESS_BACKGROUND_LOCATION",String.valueOf(grantResults[0]));
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startForegroundService(serviceIntent);
+                //startForegroundService(serviceIntent);
             }
         }
     }
