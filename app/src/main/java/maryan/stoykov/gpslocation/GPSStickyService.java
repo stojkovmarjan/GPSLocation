@@ -7,6 +7,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,12 +29,13 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     Handler handler;
     Runnable runnable;
+    GPSListener gpsListener;
     @Override
     public void onDestroy() {
 
         Log.e("SERVICE STOP","DESTROY");
 
-       handler.removeCallbacks(runnable);
+        handler.removeCallbacks(runnable);
 
         handler.removeCallbacksAndMessages(null);
 
@@ -53,7 +55,9 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        GPSListener gpsListener = new GPSListener(getApplicationContext(), this);
+        Context context = this;
+
+        gpsListener = new GPSListener(getApplicationContext(), this);
 
         handler = new Handler();
 
@@ -64,9 +68,21 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                 Log.e("RUNNABLE", "Runnable is running");
 
                 gpsListener.requestLocation();
+                Post post = new Post(context, "https://msvs.ddnsfree.com/api/location");
+                Location location = gpsListener.getLocation();
+
+                if (location != null){
+
+                    Log.e("Location", "Location sent from runnable!");
+
+                    post.sendPost(gpsListener.getLocation());
+                } else {
+                    Log.e("Location", "NULL");
+                }
+
 
                 if (handler != null) {
-                    handler.postDelayed(this,1000*20*1);
+                    handler.postDelayed(this,1000*60*1);
                 }
 
             }
@@ -82,17 +98,22 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         if (signal.equals("STOP")) {
             Log.e("SERVICE STOP","STOP SIGNAL");
             gpsListener.stopLocationUpdate();
-
+            handler.removeCallbacks(runnable);
             stopForeground(true);
             //stopService(intent);
             stopSelfResult(1001);
             stopSelf();
-            handler.removeCallbacks(runnable);
+
             return START_NOT_STICKY;
 
         } else {
-            handler.postDelayed(runnable,2000);
+            runnable.run();
+            Log.e("SIGNAL","START");
+            //gpsListener = new GPSListener(getApplicationContext(), this);
+            gpsListener.requestLocation();
+//            handler.postDelayed(runnable,2000);
             startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
+            gpsListener = new GPSListener(getApplicationContext(), this);
         }
 
         //return super.onStartCommand(intent, flags, startId);
@@ -130,6 +151,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
      */
     @Override
     public void onLocationSubmit(Location location) {
+
         Log.e(
                 "Location changed", location.getLatitude()+", "
                         +location.getLongitude()+","
