@@ -52,6 +52,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         GPSListener gpsListener = new GPSListener(getApplicationContext(), this);
 
         handler = new Handler();
@@ -135,53 +136,8 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                         +location.getAccuracy()
         );
 
-        // LocationSaver locationSaver = new LocationSaver();
-        // locationSaver.SaveFile("assdsddsd");
-        sendPost(location);
+        Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
+        post.sendPost(location);
     }
 
-    // TODO: Move this method to a separate class
-    public void sendPost(Location location) {
-
-        @SuppressLint("HardwareIds")
-        String deviceId = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL("https://msvs.ddnsfree.com/api/location");
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                    conn.setRequestProperty("Accept","application/json");
-                    conn.setDoOutput(true);
-                    conn.setDoInput(true);
-
-                    JSONObject jsonParam = new JSONObject();
-                    jsonParam.put("deviceId", deviceId);
-                    jsonParam.put("latitude", location.getLatitude());
-                    jsonParam.put("longitude", location.getLongitude());
-                    jsonParam.put("accuracy",location.getAccuracy());
-
-                    Log.i("JSON", jsonParam.toString());
-                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                    //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
-                    os.writeBytes(jsonParam.toString());
-
-                    os.flush();
-                    os.close();
-
-                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
-                    Log.i("MSG" , conn.getResponseMessage());
-
-                    conn.disconnect();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        thread.start();
-    }
 }
