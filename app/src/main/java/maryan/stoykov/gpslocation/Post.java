@@ -14,11 +14,11 @@ import java.net.URL;
 
 public class Post {
     private final Context context;
-    private final String URL;
+    private final String endpointURL;
 
-    public Post(Context context, String URL) {
+    public Post(Context context, String endpointURL) {
         this.context = context;
-        this.URL = URL;
+        this.endpointURL = endpointURL;
     }
 
     public void sendPost(Location location) {
@@ -29,7 +29,7 @@ public class Post {
             @Override
             public void run() {
                 try {
-                    java.net.URL url = new URL("https://msvs.ddnsfree.com/api/location");
+                    java.net.URL url = new URL(endpointURL);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
