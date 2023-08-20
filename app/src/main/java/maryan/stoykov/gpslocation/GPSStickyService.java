@@ -2,7 +2,6 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,17 +12,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-
-import org.json.JSONObject;
-
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
@@ -33,7 +24,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public void onDestroy() {
 
-        Log.e("SERVICE STOP","DESTROY");
+        Log.d("GPSStickyService","SERVICE DESTROY");
 
         handler.removeCallbacks(runnable);
 
@@ -47,7 +38,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     @Override
     public boolean stopService(Intent name) {
-        Log.e("SERVICE STOP","STOP");
+        Log.d("GPSStickyService","SERVICE STOP");
         return super.stopService(name);
 
     }
@@ -65,19 +56,22 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         runnable = new Runnable() {
             @Override
             public void run() {
-                Log.e("RUNNABLE", "Runnable is running");
+                Log.d("GPSStickyService", "Runnable is running");
 
                 gpsListener.requestLocation();
+
                 Post post = new Post(context, "https://msvs.ddnsfree.com/api/location");
+
                 Location location = gpsListener.getLocation();
 
                 if (location != null){
 
-                    Log.e("Location", "Location sent from runnable!");
+                    Log.d("GPSStickyService", "Location sent from runnable!");
 
                     post.sendPost(gpsListener.getLocation());
+
                 } else {
-                    Log.e("Location", "NULL");
+                    Log.d("GPSStickyService", "Location from runnable is NULL");
                 }
 
 
@@ -93,22 +87,23 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
         if (intent.hasExtra("SIGNAL")) signal = extras.getString("SIGNAL");
 
-        Log.e("SIGNAL", signal);
+        Log.d("GPSStickyService", "SIGNAL RECEIVED "+signal);
 
         if (signal.equals("STOP")) {
-            Log.e("SERVICE STOP","STOP SIGNAL");
-            gpsListener.stopLocationUpdate();
-            handler.removeCallbacks(runnable);
-            stopForeground(true);
-            //stopService(intent);
-            stopSelfResult(1001);
-            stopSelf();
 
-            return START_NOT_STICKY;
+                Log.d("GPSStickyService","STOP SIGNAL");
+                gpsListener.stopLocationUpdate();
+                handler.removeCallbacks(runnable);
+                stopForeground(true);
+                //stopService(intent);
+                stopSelfResult(1001);
+                stopSelf();
+
+                return START_NOT_STICKY;
 
         } else {
             runnable.run();
-            Log.e("SIGNAL","START");
+            Log.d("GPSStickyService","START");
             //gpsListener = new GPSListener(getApplicationContext(), this);
             gpsListener.requestLocation();
 //            handler.postDelayed(runnable,2000);
@@ -151,9 +146,9 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
      */
     @Override
     public void onLocationSubmit(Location location) {
-
-        Log.e(
-                "Location changed", location.getLatitude()+", "
+        Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
+        Log.i(
+                "GPSStickyService", location.getLatitude()+", "
                         +location.getLongitude()+","
                         +location.getAccuracy()
         );
