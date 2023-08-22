@@ -40,6 +40,15 @@ public class MainActivity extends AppCompatActivity {
     Button btnStop;
     Button btnAbout;
 
+    final String[] permissions = {
+            Manifest.permission.FOREGROUND_SERVICE,
+            Manifest.permission.RECEIVE_BOOT_COMPLETED,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,14 +115,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean checkPermissions() {
-        String[] permissions = {
-                Manifest.permission.FOREGROUND_SERVICE,
-                Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-                Manifest.permission.INTERNET
-        };
+//        String[] permissions = {
+//                Manifest.permission.FOREGROUND_SERVICE,
+//                Manifest.permission.RECEIVE_BOOT_COMPLETED,
+//                Manifest.permission.ACCESS_FINE_LOCATION,
+//                Manifest.permission.ACCESS_COARSE_LOCATION,
+//                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+//                Manifest.permission.INTERNET
+//        };
 
         // Check if all permissions are granted
         for (String permission : permissions) {
@@ -128,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
 
     // Ask for permissions if they are not granted
     public void askForPermissions() {
-        String[] permissions = {
-                Manifest.permission.FOREGROUND_SERVICE,
-                Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-                Manifest.permission.INTERNET
-        };
+//        String[] permissions = {
+//                Manifest.permission.FOREGROUND_SERVICE,
+//                Manifest.permission.RECEIVE_BOOT_COMPLETED,
+//                Manifest.permission.ACCESS_FINE_LOCATION,
+//                Manifest.permission.ACCESS_COARSE_LOCATION,
+//                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+//                Manifest.permission.INTERNET
+//        };
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS_CODE);
 
@@ -161,19 +170,23 @@ public class MainActivity extends AppCompatActivity {
                         finish();
                     }
                 }
-                //ActivityCompat.requestPermissions(this, new String[]{"Manifest.permission.ACCESS_BACKGROUND_LOCATION"}
-                        //, REQUEST_ACCESS_BACKGROUND_LOCATION_CODE);
-                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+
+                // TODO: ACCESS_BACKGROUND_LOCATION - should go in separated method
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                     // Explain why you need background location to the user
                     // ...
                     // Then, request the background location permission
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                    ActivityCompat.requestPermissions(
+                            this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                             REQUEST_ACCESS_BACKGROUND_LOCATION_CODE);
                 } else {
                     // Request the background location permission without explanation
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                    ActivityCompat.requestPermissions(
+                            this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                             REQUEST_ACCESS_BACKGROUND_LOCATION_CODE);
                 }
+                //--------------------------------------------------------------------------
 
             } else {
                 Toast.makeText(this,

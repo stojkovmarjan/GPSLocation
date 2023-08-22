@@ -35,7 +35,7 @@ public class GPSListener implements LocationListener {
     public void onLocationChanged(@NonNull Location location) {
 
         this.location = location;
-
+        Log.d("GPSListener:", "GPS onLocationChanged event");
         gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
 
     }
@@ -60,10 +60,10 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (1000l*60l*1l), 10f, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (1000l*30l*1l), 10, this);
 
         } else {
-            Log.e("LOCATION:", "GPS NOT ENABLED!");
+            Log.d("GPSListener:", "GPS NOT ENABLED!");
         }
 
     }

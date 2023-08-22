@@ -50,6 +50,8 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
         gpsListener = new GPSListener(getApplicationContext(), this);
 
+        gpsListener.requestLocation();
+
         handler = new Handler();
 
         String signal = "";
@@ -83,7 +85,6 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         };
 
         Bundle extras = intent.getExtras();
-
 
         if (intent.hasExtra("SIGNAL")) signal = extras.getString("SIGNAL");
 
