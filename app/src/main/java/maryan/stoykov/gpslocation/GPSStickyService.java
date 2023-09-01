@@ -62,7 +62,8 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
                 gpsListener.requestLocation();
 
-                Post post = new Post(context, "https://msvs.ddnsfree.com/api/location");
+                // Post post = new Post(context, "https://msvs.ddnsfree.com/api/location");
+                Post post = new Post(context, "https://my-app.com.schweizerweb.com/api/times");
 
                 Location location = gpsListener.getLocation();
 
@@ -154,7 +155,9 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                         +location.getAccuracy()
         );
 
-        Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
+        // Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
+        Post post = new Post(this, "https://my-app.com.schweizerweb.com/api/times");
+
         post.sendPost(location);
     }
 
