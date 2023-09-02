@@ -2,14 +2,17 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.Context.LOCATION_SERVICE;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 /**
@@ -33,22 +36,24 @@ public class GPSListener implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-
+    // TODO: if sdk>29 submit location to event handler
         this.location = location;
-        Log.i("GPSListener:", "GPS onLocationChanged event");
+        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
         gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+        // TODO: if sdk<30 compare last locations from GPS and NETWORK and choose the better one
 
     }
 
     /**
      * Location update method
      */
+
     protected void requestLocation() {
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -60,9 +65,19 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
+// TODO: check SDK if > 29 then request location update from FUSED_PROVIDER
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
+                        1000l*60l*1, 0, this);
+            } else {
+                // TODO: else if sdk < 30 then request location update from GPS and NETWORK_PROVIDER
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                        1000l*60l*1, 0, this);
 
-            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                    1000l*60l*1, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        1000l*60l*1, 0, this);
+            }
+
 
         } else {
             Log.d("GPSListener:", "GPS NOT ENABLED!");
