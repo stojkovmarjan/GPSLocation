@@ -65,12 +65,12 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-// TODO: check SDK if > 29 then request location update from FUSED_PROVIDER
+            // if SDK > 30 then request location update from FUSED_PROVIDER
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
                         1000l*60l*1, 0, this);
             } else {
-                // TODO: else if sdk < 30 then request location update from GPS and NETWORK_PROVIDER
+                // if sdk < 31 then request location update from GPS and NETWORK_PROVIDER
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                         1000l*60l*1, 0, this);
 
