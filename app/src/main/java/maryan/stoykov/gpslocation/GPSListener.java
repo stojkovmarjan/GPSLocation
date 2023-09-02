@@ -14,7 +14,7 @@ import androidx.core.app.ActivityCompat;
 
 /**
  * provides the main service with location data
- * taken from the GPS sensor
+ * taken from the FUSED LOCATION provider
  */
 public class GPSListener implements LocationListener {
     Context context;
@@ -60,7 +60,9 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (1000l*60l*1), 10, this);
+
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
+                    1000l*60l*1, 0, this);
 
         } else {
             Log.d("GPSListener:", "GPS NOT ENABLED!");
