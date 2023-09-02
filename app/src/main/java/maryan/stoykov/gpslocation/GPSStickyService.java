@@ -78,7 +78,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
 
                 if (handler != null) {
-                    handler.postDelayed(this,1000*60*1);
+                    handler.postDelayed(this,1000*90*1);
                 }
 
             }
