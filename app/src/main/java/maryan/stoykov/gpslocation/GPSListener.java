@@ -8,11 +8,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 /**
@@ -22,7 +20,9 @@ import androidx.core.app.ActivityCompat;
 public class GPSListener implements LocationListener {
     Context context;
     LocationManager locationManager;
-    Location location;
+    Location location = null;
+    Location lastGPSLocation = null;
+    Location lastNetworkLocation = null;
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
@@ -36,17 +36,48 @@ public class GPSListener implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        // TODO: if sdk>29 submit location to event handler
-        this.location = location;
-        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
-        gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
-        // TODO: if sdk<30 compare last locations from GPS and NETWORK and choose the better one
 
+        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+
+        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)){
+            lastGPSLocation = location;
+        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)){
+                lastNetworkLocation = location;
+            }
+
+        this.location = chooseBetterLocation();
+
+        Log.i("GPSListener:", "GPS onLocationChanged provider "+" "+this.location.getProvider());
+
+        gpsListenerOnChange.onLocationSubmit(this.location);// emit event to sticky service
+
+    }
+
+    /**
+     * compares the accuracy of locations provided from
+     * gps sensor and network provider, returns the one with
+     * better accuracy
+     * @return location
+     */
+    Location chooseBetterLocation(){
+        if (lastGPSLocation != null && lastNetworkLocation != null) {
+            if (lastGPSLocation.getAccuracy() < lastNetworkLocation.getAccuracy()) {
+                return lastGPSLocation;
+            } else {
+                return lastNetworkLocation;
+            }
+        } else if (lastGPSLocation != null) {
+            return lastGPSLocation;
+        } else if (lastNetworkLocation != null) {
+            return lastNetworkLocation;
+        } else {
+            // Handle the case where no location data is available
+            return null;
+        }
     }
 
     protected void requestLocation() {
 
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -61,25 +92,13 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            // if SDK > 30 then request location update from FUSED_PROVIDER
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        1000L * 10 *1, 0f, this);
-            } else {
-                // if sdk < 31 then request location update from GPS and NETWORK_PROVIDER
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 10 *1, 0f, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                        1000L * 60 *5, 10f, this);
 
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        1000L * 10 *1, 0f, this);
-            }
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        1000L * 60 *5, 10f, this);
 
-
-        } else {
-            Log.d("GPSListener:", "GPS NOT ENABLED!");
         }
-
-    }
 
     public Location getLocation(){
         return this.location;
@@ -98,5 +117,7 @@ public class GPSListener implements LocationListener {
 
     public void stopLocationUpdate(){
         locationManager.removeUpdates(this);
+        locationManager = null;
     }
+
 }
