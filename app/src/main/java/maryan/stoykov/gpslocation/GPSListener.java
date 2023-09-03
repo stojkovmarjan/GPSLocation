@@ -36,17 +36,13 @@ public class GPSListener implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-    // TODO: if sdk>29 submit location to event handler
+        // TODO: if sdk>29 submit location to event handler
         this.location = location;
         Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
         gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
         // TODO: if sdk<30 compare last locations from GPS and NETWORK and choose the better one
 
     }
-
-    /**
-     * Location update method
-     */
 
     protected void requestLocation() {
 
@@ -68,14 +64,14 @@ public class GPSListener implements LocationListener {
             // if SDK > 30 then request location update from FUSED_PROVIDER
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        1000l*60l*1, 0, this);
+                        1000L * 10 *1, 0f, this);
             } else {
                 // if sdk < 31 then request location update from GPS and NETWORK_PROVIDER
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000l*60l*1, 0, this);
+                        1000L * 10 *1, 0f, this);
 
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        1000l*60l*1, 0, this);
+                        1000L * 10 *1, 0f, this);
             }
 
 

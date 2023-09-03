@@ -11,10 +11,12 @@ import org.json.JSONObject;
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 
 public class Post {
     private final Context context;
     private final String endpointURL;
+    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     public Post(Context context, String endpointURL) {
         this.context = context;
@@ -41,7 +43,7 @@ public class Post {
                     jsonParam.put("deviceId", deviceId);
                     jsonParam.put("latitude", location.getLatitude());
                     jsonParam.put("longitude", location.getLongitude());
-                    jsonParam.put("accuracy",location.getAccuracy());
+                    jsonParam.put("accuracy", df.format(location.getAccuracy()) );
 
                     Log.i("JSON", jsonParam.toString());
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
