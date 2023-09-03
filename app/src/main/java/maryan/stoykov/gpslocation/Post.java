@@ -44,6 +44,7 @@ public class Post {
                     jsonParam.put("latitude", location.getLatitude());
                     jsonParam.put("longitude", location.getLongitude());
                     jsonParam.put("accuracy", df.format(location.getAccuracy()) );
+                    jsonParam.put("provider",location.getProvider());
 
                     Log.i("JSON", jsonParam.toString());
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());

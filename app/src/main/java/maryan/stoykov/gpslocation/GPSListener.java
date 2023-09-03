@@ -45,7 +45,11 @@ public class GPSListener implements LocationListener {
                 lastNetworkLocation = location;
             }
 
-        this.location = chooseBetterLocation();
+        if (this.location != null && chooseBetterLocation().equals(this.location)){
+            return;
+        } else {
+            this.location = chooseBetterLocation();
+        }
 
         Log.i("GPSListener:", "GPS onLocationChanged provider "+" "+this.location.getProvider());
 
@@ -93,10 +97,10 @@ public class GPSListener implements LocationListener {
             }
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 60 *5, 10f, this);
+                        1000L * 10 * 1, 0f, this);
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        1000L * 60 *5, 10f, this);
+                        1000L * 10 * 1, 0f, this);
 
         }
 

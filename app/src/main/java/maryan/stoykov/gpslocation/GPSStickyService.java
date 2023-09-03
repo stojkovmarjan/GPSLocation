@@ -21,6 +21,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public void onDestroy() {
         Log.d("GPSStickyService","SERVICE DESTROY");
+        gpsListener = null;
         super.onDestroy();
     }
 
@@ -56,7 +57,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                 stopSelfResult(1001);
                 stopSelf();
 
-                return START_NOT_STICKY;
+                return START_NOT_STICKY;// not working this way!
 
         } else {
             Log.d("GPSStickyService","START");
