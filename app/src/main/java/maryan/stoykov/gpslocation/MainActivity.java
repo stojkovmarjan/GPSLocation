@@ -53,24 +53,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Whitelist the restricted permissions.
-//        PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(MODE_FULL_INSTALL);
-//        params.setWhitelistedRestrictedPermissions(new HashSet<>(Arrays.asList("ACCESS_BACKGROUND_LOCATION")));
-//
-//        PackageInstaller installer = getPackageManager().getPackageInstaller();
-//        try {
-//            int sessionId = installer.createSession(params);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
 
         btnStart = findViewById(R.id.btnStart);
         btnStop = findViewById(R.id.btnStop);
         btnAbout = findViewById(R.id.btnAbout);
 
         askForPermissions();
-
-
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,14 +103,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean checkPermissions() {
-//        String[] permissions = {
-//                Manifest.permission.FOREGROUND_SERVICE,
-//                Manifest.permission.RECEIVE_BOOT_COMPLETED,
-//                Manifest.permission.ACCESS_FINE_LOCATION,
-//                Manifest.permission.ACCESS_COARSE_LOCATION,
-//                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-//                Manifest.permission.INTERNET
-//        };
 
         // Check if all permissions are granted
         for (String permission : permissions) {
@@ -137,14 +117,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Ask for permissions if they are not granted
     public void askForPermissions() {
-//        String[] permissions = {
-//                Manifest.permission.FOREGROUND_SERVICE,
-//                Manifest.permission.RECEIVE_BOOT_COMPLETED,
-//                Manifest.permission.ACCESS_FINE_LOCATION,
-//                Manifest.permission.ACCESS_COARSE_LOCATION,
-//                //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
-//                Manifest.permission.INTERNET
-//        };
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS_CODE);
 

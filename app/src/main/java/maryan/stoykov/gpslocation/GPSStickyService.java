@@ -71,7 +71,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
                     Log.d("GPSStickyService", "Location sent from runnable!");
 
-                    post.sendPost(gpsListener.getLocation());
+                    post.sendPost(gpsListener.getLocation(), "");
 
                 } else {
                     Log.d("GPSStickyService", "Location from runnable is NULL");
@@ -158,7 +158,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         // Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
         Post post = new Post(this, "https://my-app.com.schweizerweb.com/api/times");
 
-        post.sendPost(location);
+        post.sendPost(location, "");
     }
 
 }

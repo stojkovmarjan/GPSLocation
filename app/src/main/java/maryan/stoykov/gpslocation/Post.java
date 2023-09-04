@@ -23,7 +23,7 @@ public class Post extends AppCompatActivity  {
         this.endpointURL = endpointURL;
     }
 
-    public void sendPost(Location location) {
+    public void sendPost(Location location, String msg) {
 
         @SuppressLint("HardwareIds")
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -45,6 +45,7 @@ public class Post extends AppCompatActivity  {
                     jsonParam.put("lat", location.getLatitude());
                     jsonParam.put("lon", location.getLongitude());
                     jsonParam.put("acc",location.getAccuracy());
+                    jsonParam.put("msg",msg);
 
 
                   Log.i("JSON", jsonParam.toString());
