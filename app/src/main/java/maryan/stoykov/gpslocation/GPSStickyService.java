@@ -21,6 +21,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     Handler handler;
     Runnable runnable;
     GPSListener gpsListener;
+    String msg = "";
     @Override
     public void onDestroy() {
 
@@ -45,6 +46,9 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("ON START COMMAND","ON START COMMAND");
+
+        this.msg = "STARTED TRACKING";
 
         Context context = this;
 
@@ -92,25 +96,28 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         Log.d("GPSStickyService", "SIGNAL RECEIVED "+signal);
 
         if (signal.equals("STOP")) {
-
-                Log.d("GPSStickyService","STOP SIGNAL");
-                gpsListener.stopLocationUpdate();
-                handler.removeCallbacks(runnable);
-                stopForeground(true);
-                //stopService(intent);
-                stopSelfResult(1001);
-                stopSelf();
+            this.msg = "STOPPED TRACKING";
+            Log.d("GPSStickyService","STOP SIGNAL");
+            gpsListener.stopLocationUpdate();
+            handler.removeCallbacks(runnable);
+            stopForeground(true);
+            //stopService(intent);
+            stopSelfResult(1001);
+            stopSelf();
 
                 return START_NOT_STICKY;
 
         } else {
-            runnable.run();
+           // gpsListener = new GPSListener(getApplicationContext(), this);
+
+//            gpsListener.requestLocation();
+//
+//            onLocationSubmit(gpsListener.getLocation(),"STARTED TRACKING");
+
             Log.d("GPSStickyService","START");
-            //gpsListener = new GPSListener(getApplicationContext(), this);
-            gpsListener.requestLocation();
-//            handler.postDelayed(runnable,2000);
             startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
-            gpsListener = new GPSListener(getApplicationContext(), this);
+
+            runnable.run();
         }
 
         //return super.onStartCommand(intent, flags, startId);
@@ -147,7 +154,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
      * @param location
      */
     @Override
-    public void onLocationSubmit(Location location) {
+    public void onLocationSubmit(Location location, String msg) {
         Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
         Log.i(
                 "GPSStickyService", location.getLatitude()+", "
@@ -155,10 +162,13 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                         +location.getAccuracy()
         );
 
-        // Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
         Post post = new Post(this, "https://my-app.com.schweizerweb.com/api/times");
-
-        post.sendPost(location, "");
+        if (!this.msg.equals("")) {
+            post.sendPost(location, this.msg);
+            this.msg = "";
+        } else {
+            post.sendPost(location, msg);
+        }
     }
 
 }

@@ -36,7 +36,7 @@ public class GPSListener implements LocationListener {
 
         this.location = location;
         Log.d("GPSListener:", "GPS onLocationChanged event");
-        gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+        gpsListenerOnChange.onLocationSubmit(location, "");// emit event to sticky service
 
     }
 
