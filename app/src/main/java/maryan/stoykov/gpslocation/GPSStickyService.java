@@ -106,7 +106,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                         +location.getAccuracy()
         );
 
-        Post post = new Post(this, "https://msvs.ddnsfree.com/api/location");
+        Post post = new Post(this, "https://pijo.linkpc.net/api/location");
         post.sendPost(location);
     }
 

@@ -24,6 +24,28 @@ public class GPSListener implements LocationListener {
     Location lastGPSLocation = null;
     Location lastNetworkLocation = null;
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
+
+    LocationListener gpsLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+        }
+    };
+    LocationListener networkLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            Log.i("NETListener:", "Network onLocationChanged event"+" "+location.getProvider());
+            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+        }
+    };
+    LocationListener fusedLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(@NonNull Location location) {
+            Log.i("FUSEDListener:", "FUSED onLocationChanged event"+" "+location.getProvider());
+            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
+        }
+    };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         this.context = context;
@@ -37,29 +59,30 @@ public class GPSListener implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
-
-        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)){
-            lastGPSLocation = location;
-        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)){
-                lastNetworkLocation = location;
-            }
-
-        if (this.location != null && chooseBetterLocation().equals(this.location)){
-            return;
-        } else {
-            this.location = chooseBetterLocation();
-        }
-
-        Log.i("GPSListener:", "GPS onLocationChanged provider "+" "+this.location.getProvider());
-
-        gpsListenerOnChange.onLocationSubmit(this.location);// emit event to sticky service
+//        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+//
+//        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)){
+//            lastGPSLocation = location;
+//        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)){
+//                lastNetworkLocation = location;
+//            }
+//
+//        if (this.location != null && chooseBetterLocation().equals(this.location)){
+//            return;
+//        } else {
+//            this.location = chooseBetterLocation();
+//        }
+//
+//        Log.i("GPSListener:", "GPS onLocationChanged provider "+" "
+//                +this.location.getProvider());
+//
+//        gpsListenerOnChange.onLocationSubmit(this.location);// emit event to sticky service
 
     }
 
     /**
      * compares the accuracy of locations provided from
-     * gps sensor and network provider, returns the one with
+     * gps and network provider, returns the one with
      * better accuracy
      * @return location
      */
@@ -96,11 +119,14 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 10 * 1, 0f, this);
-
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        1000L * 10 * 1, 0f, this);
+                1000L * 10 * 1, 0f, networkLocationListener);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                        1000L * 10 * 1, 0f, gpsLocationListener);
+
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
+                1000L * 10 * 1, 0f, fusedLocationListener);
 
         }
 
@@ -120,7 +146,9 @@ public class GPSListener implements LocationListener {
     }
 
     public void stopLocationUpdate(){
-        locationManager.removeUpdates(this);
+        locationManager.removeUpdates(networkLocationListener);
+        locationManager.removeUpdates(gpsLocationListener);
+        locationManager.removeUpdates(fusedLocationListener);
         locationManager = null;
     }
 
