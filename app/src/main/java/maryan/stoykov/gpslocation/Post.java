@@ -23,8 +23,8 @@ public class Post {
         this.endpointURL = endpointURL;
     }
 
-    public void sendPost(Location location) {
-
+    public void sendPost(Location location, String msg) {
+        Log.i("POST CLASS", msg);
         @SuppressLint("HardwareIds")
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         Thread thread = new Thread(new Runnable() {
@@ -45,6 +45,7 @@ public class Post {
                     jsonParam.put("longitude", location.getLongitude());
                     jsonParam.put("accuracy", df.format(location.getAccuracy()) );
                     jsonParam.put("provider",location.getProvider());
+                    jsonParam.put("message",msg);
 
                     Log.i("JSON", jsonParam.toString());
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());

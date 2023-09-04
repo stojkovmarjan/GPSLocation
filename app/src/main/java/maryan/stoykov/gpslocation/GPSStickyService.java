@@ -18,16 +18,29 @@ import androidx.annotation.Nullable;
 
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
+    String serviceSignalMsg = "";
     @Override
     public void onDestroy() {
-        Log.d("GPSStickyService","SERVICE DESTROY");
-        gpsListener = null;
+
         super.onDestroy();
+
+        Log.d("GPSStickyService","SERVICE DESTROY");
+
+        serviceSignalMsg = "SERVICE IS DESTROYED MSG";
+
+        onLocationSubmit(gpsListener.getLocation(),serviceSignalMsg);
+
+        gpsListener.stopLocationUpdate();
+
+        gpsListener = null;
+
+        stopForeground(true);
+
     }
 
     @Override
     public boolean stopService(Intent name) {
-        Log.d("GPSStickyService","SERVICE STOP");
+
         return super.stopService(name);
 
     }
@@ -35,35 +48,20 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        serviceSignalMsg = "SERVICE IS STARTED ON BOOT";
+
+        if (intent.hasExtra("SIGNAL")){
+            serviceSignalMsg = intent.getExtras().getString("SIGNAL");
+        }
+
         Context context = this;
 
-        gpsListener = new GPSListener(getApplicationContext(), this);
+        gpsListener = new GPSListener(this, this);
 
         gpsListener.requestLocation();
 
-        String signal = "";
-
-        Bundle extras = intent.getExtras();
-
-        if (intent.hasExtra("SIGNAL")) signal = extras.getString("SIGNAL");
-
-        Log.d("GPSStickyService", "SIGNAL RECEIVED "+signal);
-
-        if (signal.equals("STOP")) {
-
-                Log.d("GPSStickyService","STOP SIGNAL");
-                gpsListener.stopLocationUpdate();
-                stopForeground(true);
-                stopSelfResult(1001);
-                stopSelf();
-
-                return START_NOT_STICKY;// not working this way!
-
-        } else {
-            Log.d("GPSStickyService","START");
-            startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
-        }
-
+        Log.d("GPSStickyService","START");
+        startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
@@ -98,7 +96,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
      * @param location
      */
     @Override
-    public void onLocationSubmit(Location location) {
+    public void onLocationSubmit(Location location, String msg) {
         Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
         Log.i(
                 "GPSStickyService", location.getLatitude()+", "
@@ -107,7 +105,13 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
         );
 
         Post post = new Post(this, "https://pijo.linkpc.net/api/location");
-        post.sendPost(location);
+        if (serviceSignalMsg.equals("")){
+            post.sendPost(location, msg);
+        } else {
+            post.sendPost(location, serviceSignalMsg);
+            serviceSignalMsg = "";
+        }
+
     }
 
 }

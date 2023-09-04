@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation;
 
+import static android.app.PendingIntent.getService;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!isServiceRunning()){
                     if (checkPermissions() ){
                         serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+                        serviceIntent.putExtra("SIGNAL","SERVICE IS STARTED BY USER MSG");
                         startForegroundService(serviceIntent);
                     } else {
                         askForPermissions();
@@ -69,9 +72,11 @@ public class MainActivity extends AppCompatActivity {
                     if (serviceIntent == null) {
                         serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
                     }
-                    serviceIntent.putExtra("SIGNAL","STOP");
-                    startForegroundService(serviceIntent);
+                    //serviceIntent.putExtra("SIGNAL","STOP");
+                    //startForegroundService(serviceIntent);
+                    stopService(serviceIntent);
                     serviceIntent = null;
+
                 }
             }
         });
