@@ -60,7 +60,7 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, (1000l*30l*1l), 10, this);
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, (1000l*30l*1l), 0, this);
 
         } else {
             Log.d("GPSListener:", "GPS NOT ENABLED!");
