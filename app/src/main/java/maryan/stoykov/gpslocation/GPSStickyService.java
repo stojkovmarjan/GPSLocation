@@ -16,6 +16,9 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
     String serviceSignalMsg = "";
@@ -104,11 +107,14 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     public void onLocationSubmit(Location location, String msg) {
 
         Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
-        Log.i(
-                "GPSStickyService", location.getLatitude()+", "
-                        +location.getLongitude()+","
-                        +location.getAccuracy()
-        );
+        Log.i("GPSStickyService", location.toString());
+
+        Date date = new Date(location.getTime());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Log.i("GPSStickyService", dateFormat.format(date));
+
+
 
         Post post = new Post(this, "https://pijo.linkpc.net/api/location");
         if (serviceSignalMsg.equals("")){

@@ -12,13 +12,17 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 
 public class Post {
     private final Context context;
     private final String endpointURL;
     private static final DecimalFormat df = new DecimalFormat("0.00");
+    @SuppressLint("SimpleDateFormat")
+    private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    );
     private HttpURLConnection conn;
-
 
     public Post(Context context, String endpointURL) {
         this.context = context;
@@ -26,7 +30,9 @@ public class Post {
     }
 
     public void sendPost(Location location, String msg) {
+
         Log.i("POST CLASS", msg);
+
         @SuppressLint("HardwareIds")
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -44,6 +50,7 @@ public class Post {
                     conn.setDoInput(true);
 
                     JSONObject jsonParam = new JSONObject();
+                    jsonParam.put("time", locationDateFormat.format(location.getTime()));
                     jsonParam.put("deviceId", deviceId);
                     jsonParam.put("latitude", location.getLatitude());
                     jsonParam.put("longitude", location.getLongitude());
@@ -60,15 +67,15 @@ public class Post {
                     os.flush();
                     os.close();
 
-                    Log.i("POST CLASS","Response code: "+ String.valueOf(conn.getResponseCode()));
+                    Log.i("POST CLASS","Response code: "+ conn.getResponseCode());
                     Log.i("POST CLASS" , conn.getResponseMessage());
 
                 } catch (Exception e) {
-                    /** TODO: Here if endpoint not available, no internet or whatever
-                     * save data to local storage and set data stored flag to true
-                     * IF available check if data stored flag is true
-                     * IF flag is true read data from storage and send it to the endpoint
-                     * set flag false on the end of the process
+                    /* TODO: Here if endpoint not available, no internet or whatever
+                      save data to local storage and set data stored flag to true
+                      IF available check if data stored flag is true
+                      IF flag is true read data from storage and send it to the endpoint
+                      set flag false on the end of the process
                      */
                     Log.e("POST CLASS","ENDPOINT NOT AVAILABLE");
                     Log.i("POST CLAAS",
