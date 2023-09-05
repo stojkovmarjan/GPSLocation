@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
     String serviceSignalMsg = "";
+
     @Override
     public void onDestroy() {
 
@@ -93,10 +94,12 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     /**
      * listens to location changes in GPSListener class
-     * @param location
+     * @param location, Location from location provider
+     * @param msg, String, message in context of the location data
      */
     @Override
     public void onLocationSubmit(Location location, String msg) {
+
         Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
         Log.i(
                 "GPSStickyService", location.getLatitude()+", "
@@ -111,7 +114,5 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
             post.sendPost(location, serviceSignalMsg);
             serviceSignalMsg = "";
         }
-
     }
-
 }

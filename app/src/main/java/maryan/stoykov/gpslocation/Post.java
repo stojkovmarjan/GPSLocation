@@ -17,6 +17,8 @@ public class Post {
     private final Context context;
     private final String endpointURL;
     private static final DecimalFormat df = new DecimalFormat("0.00");
+    private HttpURLConnection conn;
+
 
     public Post(Context context, String endpointURL) {
         this.context = context;
@@ -27,12 +29,14 @@ public class Post {
         Log.i("POST CLASS", msg);
         @SuppressLint("HardwareIds")
         String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+
                 try {
                     java.net.URL url = new URL(endpointURL);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                     conn.setRequestProperty("Accept","application/json");
@@ -47,21 +51,34 @@ public class Post {
                     jsonParam.put("provider",location.getProvider());
                     jsonParam.put("message",msg);
 
-                    Log.i("JSON", jsonParam.toString());
+                    Log.i("POST CLASS", jsonParam.toString());
+
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                    //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
+
                     os.writeBytes(jsonParam.toString());
 
                     os.flush();
                     os.close();
 
-                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
-                    Log.i("MSG" , conn.getResponseMessage());
 
-                    conn.disconnect();
+                    Log.i("POST CLASS","Response code: "+ String.valueOf(conn.getResponseCode()));
+                    Log.i("POST CLASS" , conn.getResponseMessage());
+
+
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    /** TODO: Here if endpoint not available, no internet or whatever
+                     * save data to local storage and set data stored flag to true
+                     * IF available check if data stored flag is true
+                     * IF flag is true read data from storage and send it to the endpoint
+                     * set flag false on the end of the process
+                     */
+                    Log.e("POST CLASS","ENDPOINT NOT AVAILABLE");
+                    Log.i("POST CLAAS",
+                            "NOT SENT: "+location.getLatitude()+", "+location.getLongitude());
+
+                } finally {
+                    conn.disconnect();
                 }
             }
         });

@@ -1,7 +1,5 @@
 package maryan.stoykov.gpslocation;
 
-import static android.app.PendingIntent.getService;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
