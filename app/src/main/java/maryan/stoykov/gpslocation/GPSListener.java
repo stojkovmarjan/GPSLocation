@@ -106,9 +106,9 @@ public class GPSListener implements LocationListener {
             } else {
                 chosenLocation = lastNetworkLocation;
             }
-        } else if (lastGPSLocation != null && lastNetworkLocation == null) {
+        } else if (lastGPSLocation != null) {
             chosenLocation = lastGPSLocation;
-        } else if (lastNetworkLocation != null && lastGPSLocation == null){
+        } else if (lastNetworkLocation != null){
             chosenLocation = lastNetworkLocation;
         }
 

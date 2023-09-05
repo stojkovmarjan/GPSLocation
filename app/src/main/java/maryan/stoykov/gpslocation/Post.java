@@ -60,11 +60,8 @@ public class Post {
                     os.flush();
                     os.close();
 
-
                     Log.i("POST CLASS","Response code: "+ String.valueOf(conn.getResponseCode()));
                     Log.i("POST CLASS" , conn.getResponseMessage());
-
-
 
                 } catch (Exception e) {
                     /** TODO: Here if endpoint not available, no internet or whatever

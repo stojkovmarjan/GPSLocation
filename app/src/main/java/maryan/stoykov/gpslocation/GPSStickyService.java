@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
     String serviceSignalMsg = "";
+    private static DBHelper dbHelper;
 
     @Override
     public void onDestroy() {
@@ -48,6 +49,8 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        dbHelper = new DBHelper(this);
 
         serviceSignalMsg = "SERVICE IS STARTED ON BOOT";
 
