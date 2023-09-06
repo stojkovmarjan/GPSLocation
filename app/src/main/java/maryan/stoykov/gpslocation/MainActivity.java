@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.RECEIVE_BOOT_COMPLETED,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
-            //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET
     };
 
@@ -45,47 +43,34 @@ public class MainActivity extends AppCompatActivity {
         btnAbout = findViewById(R.id.btnAbout);
 
         askForPermissions();
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                if (!isServiceRunning()){
-                    if (checkPermissions() ){
-                        serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
-                        serviceIntent.putExtra("SIGNAL","SERVICE IS STARTED BY USER MSG");
-                        startForegroundService(serviceIntent);
-                    } else {
-                        askForPermissions();
-                    }
+        btnStart.setOnClickListener(view -> {
+            if (!isServiceRunning()){
+                if (checkPermissions() ){
+                    serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+                    serviceIntent.putExtra("SIGNAL","SERVICE IS STARTED BY USER MSG");
+                    startForegroundService(serviceIntent);
+                } else {
+                    askForPermissions();
                 }
+            }
 
+        });
+
+        btnStop.setOnClickListener(view -> {
+            if (isServiceRunning()){
+                if (serviceIntent == null) {
+                    serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+                }
+                stopService(serviceIntent);
+                serviceIntent = null;
             }
         });
 
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (isServiceRunning()){
-                    if (serviceIntent == null) {
-                        serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
-                    }
-                    //serviceIntent.putExtra("SIGNAL","STOP");
-                    //startForegroundService(serviceIntent);
-                    stopService(serviceIntent);
-                    serviceIntent = null;
-
-                }
-            }
-        });
-
-        btnAbout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                @SuppressLint("HardwareIds")
-                String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-                Toast.makeText( MainActivity.this, deviceId, Toast.LENGTH_LONG).show();
-            }
+        btnAbout.setOnClickListener(view -> {
+            @SuppressLint("HardwareIds")
+            String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            Toast.makeText( MainActivity.this, deviceId, Toast.LENGTH_LONG).show();
         });
 
     }
@@ -98,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         }
-
         // All permissions are granted
         return true;
     }
@@ -122,16 +106,17 @@ public class MainActivity extends AppCompatActivity {
             if ( grantResults.length > 0 ) {
                 // Permission granted, proceed with using location services
                 for (int grantResult: grantResults) {
-                    Log.e ("GRANT: ", String.valueOf(grantResult));
+
                     if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         Toast.makeText(this,
                                 "Please restart the application and grant all permissions!",
                                 Toast.LENGTH_LONG).show();
                         finish();
                     }
+
                 }
 
-                // TODO: ACCESS_BACKGROUND_LOCATION - should go in separated method
+                // TODO: ACCESS_BACKGROUND_LOCATION - should go in separated method?
                 if (shouldShowRequestPermissionRationale(
                         Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                     // Explain why you need background location to the user
@@ -158,10 +143,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_ACCESS_BACKGROUND_LOCATION_CODE) {
             Log.i("ACCESS_BACKGROUND_LOCATION", "ACCESS_BACKGROUND_LOCATION "+String.valueOf(grantResults[0]));
-
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //startForegroundService(serviceIntent);
-            }
         }
     }
 
@@ -176,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         }
-
         return false;
     }
 }

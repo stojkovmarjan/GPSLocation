@@ -1,14 +1,11 @@
 package maryan.stoykov.gpslocation;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 
 public class Post {
     private final Context context;
@@ -58,13 +55,19 @@ public class Post {
         thread.start();
     }
 
+
+
     private void writeToDb(LocationDbRecord locationDbRecord){
+
         DBHelper db = new DBHelper(context);
+
         Long rowId = db.addLocation(locationDbRecord);
+
         if (rowId > -1) {
             Log.i("POST CLASS","Location is added to local db!");
         } else {
-            Log.e("POST CLASS","Write to db failed");
+            Log.e("POST CLASS","Write to db failed!");
         }
+
     }
 }
