@@ -2,26 +2,17 @@ package maryan.stoykov.gpslocation;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.location.Location;
 import android.provider.Settings;
 import android.util.Log;
-
-import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 public class Post {
     private final Context context;
     private final String endpointURL;
-    private static final DecimalFormat df = new DecimalFormat("0.00");
-    @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    );
     private HttpURLConnection conn;
 
     public Post(Context context, String endpointURL) {
@@ -29,19 +20,15 @@ public class Post {
         this.endpointURL = endpointURL;
     }
 
-    public void sendPost(Location location, String msg) {
-
-        Log.i("POST CLASS", msg);
-
-        @SuppressLint("HardwareIds")
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
+    public void sendPost(LocationDbRecord locationDbRecord) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 try {
+
                     java.net.URL url = new URL(endpointURL);
+
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
@@ -49,20 +36,9 @@ public class Post {
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
 
-                    JSONObject jsonParam = new JSONObject();
-                    jsonParam.put("time", locationDateFormat.format(location.getTime()));
-                    jsonParam.put("deviceId", deviceId);
-                    jsonParam.put("latitude", location.getLatitude());
-                    jsonParam.put("longitude", location.getLongitude());
-                    jsonParam.put("accuracy", df.format(location.getAccuracy()) );
-                    jsonParam.put("provider",location.getProvider());
-                    jsonParam.put("message",msg);
-
-                    Log.i("POST CLASS", jsonParam.toString());
-
                     DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
-                    os.writeBytes(jsonParam.toString());
+                    os.writeBytes(locationDbRecord.getLocationJson().toString());
 
                     os.flush();
                     os.close();
@@ -71,16 +47,8 @@ public class Post {
                     Log.i("POST CLASS" , conn.getResponseMessage());
 
                 } catch (Exception e) {
-                    /* TODO: Here if endpoint not available, no internet or whatever
-                      save data to local storage and set data stored flag to true
-                      IF available check if data stored flag is true
-                      IF flag is true read data from storage and send it to the endpoint
-                      set flag false on the end of the process
-                     */
                     Log.e("POST CLASS","ENDPOINT NOT AVAILABLE");
-                    Log.i("POST CLAAS",
-                            "NOT SENT: "+location.getLatitude()+", "+location.getLongitude());
-
+                    writeToDb(locationDbRecord);
                 } finally {
                     conn.disconnect();
                 }
@@ -88,5 +56,15 @@ public class Post {
         });
 
         thread.start();
+    }
+
+    private void writeToDb(LocationDbRecord locationDbRecord){
+        DBHelper db = new DBHelper(context);
+        Long rowId = db.addLocation(locationDbRecord);
+        if (rowId > -1) {
+            Log.i("POST CLASS","Location is added to local db!");
+        } else {
+            Log.e("POST CLASS","Write to db failed");
+        }
     }
 }

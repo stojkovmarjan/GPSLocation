@@ -2,6 +2,7 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,8 +10,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -22,7 +21,6 @@ import java.util.Date;
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
     String serviceSignalMsg = "";
-    private static DBHelper dbHelper;
 
     @Override
     public void onDestroy() {
@@ -53,15 +51,11 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        dbHelper = new DBHelper(this);
-
         serviceSignalMsg = "SERVICE IS STARTED ON BOOT";
 
         if (intent.hasExtra("SIGNAL")){
             serviceSignalMsg = intent.getExtras().getString("SIGNAL");
         }
-
-        Context context = this;
 
         gpsListener = new GPSListener(this, this);
 
@@ -90,12 +84,10 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
         getSystemService(NotificationManager.class).createNotificationChannel(notificationChannel);
 
-        Notification.Builder notification = new Notification.Builder (this, CHANNEL_ID)
+        return new Notification.Builder (this, CHANNEL_ID)
                 .setContentText("Foreground service is running!")
                 .setContentTitle("Service enabled")
                 .setSmallIcon(R.drawable.ic_launcher_background);
-
-        return notification;
     }
 
     /**
@@ -106,22 +98,20 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public void onLocationSubmit(Location location, String msg) {
 
-        Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
-        Log.i("GPSStickyService", location.toString());
-
-        Date date = new Date(location.getTime());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        Log.i("GPSStickyService", dateFormat.format(date));
-
-
-
-        Post post = new Post(this, "https://pijo.linkpc.net/api/location");
-        if (serviceSignalMsg.equals("")){
-            post.sendPost(location, msg);
-        } else {
-            post.sendPost(location, serviceSignalMsg);
+        if (!serviceSignalMsg.equals("")){
+            msg = serviceSignalMsg;
             serviceSignalMsg = "";
         }
+
+        Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
+
+        Log.i("GPSStickyService", location.toString());
+
+        Post post = new Post(this, "https://pijo.linkpc.net/api/location");
+
+        LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
+
+        post.sendPost(locationDbRecord);
+
     }
 }

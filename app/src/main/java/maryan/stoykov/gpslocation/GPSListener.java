@@ -117,14 +117,14 @@ public class GPSListener implements LocationListener {
             }
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 60 * 5, 4.5f, this);
+                        1000L * 30 * 1, 0f, this);
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                1000L * 60 * 5, 4.5f, this);
+                1000L * 30 * 1, 0f, this);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
                 locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        1000L * 60 * 5, 4.5f, this);
+                        1000L * 30 * 1, 0f, this);
             }
 
         }
