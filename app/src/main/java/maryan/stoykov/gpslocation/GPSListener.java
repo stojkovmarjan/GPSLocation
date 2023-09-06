@@ -26,28 +26,6 @@ public class GPSListener implements LocationListener {
     Location lastNetworkLocation = null;
     Location lastFusedLocation = null;
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
-
-//    LocationListener gpsLocationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(@NonNull Location location) {
-//            Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
-//            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
-//        }
-//    };
-//    LocationListener networkLocationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(@NonNull Location location) {
-//            Log.i("NETListener:", "Network onLocationChanged event"+" "+location.getProvider());
-//            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
-//        }
-//    };
-//    LocationListener fusedLocationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(@NonNull Location location) {
-//            Log.i("FUSEDListener:", "FUSED onLocationChanged event"+" "+location.getProvider());
-//            gpsListenerOnChange.onLocationSubmit(location);// emit event to sticky service
-//        }
-//    };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         this.context = context;
@@ -139,14 +117,14 @@ public class GPSListener implements LocationListener {
             }
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 60 * 1, 0f, this);
+                        1000L * 60 * 5, 4.5f, this);
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                1000L * 60 * 1, 0f, this);
+                1000L * 60 * 5, 4.5f, this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
                 locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        1000L * 60 * 1, 0f, this);
+                        1000L * 60 * 5, 4.5f, this);
             }
 
         }
