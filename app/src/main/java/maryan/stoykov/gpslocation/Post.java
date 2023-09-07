@@ -6,6 +6,7 @@ import android.util.Log;
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 public class Post {
     private final Context context;
@@ -40,8 +41,12 @@ public class Post {
                     os.flush();
                     os.close();
 
-                    Log.i("POST CLASS","Response code: "+ conn.getResponseCode());
                     Log.i("POST CLASS" , conn.getResponseMessage());
+                    Log.i("POST CLASS","Response code: "+ conn.getResponseCode());
+
+                    if (conn.getResponseCode() == 200){
+                        checkDatabase();
+                    }
 
                 } catch (Exception e) {
                     Log.e("POST CLASS","ENDPOINT NOT AVAILABLE");
@@ -55,7 +60,18 @@ public class Post {
         thread.start();
     }
 
+    /** @noinspection resource*/
+    private void checkDatabase(){
 
+        DBHelper dbHelper = new DBHelper(context);
+
+        if (dbHelper.getRecordsCount()<=0) return;
+
+        Log.i("POST CLASS","DB has records");
+
+        List<LocationDbRecord> locationDbRecords = dbHelper.getLocationsList();
+
+    }
 
     private void writeToDb(LocationDbRecord locationDbRecord){
 
@@ -68,6 +84,5 @@ public class Post {
         } else {
             Log.e("POST CLASS","Write to db failed!");
         }
-
     }
 }

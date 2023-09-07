@@ -28,8 +28,8 @@ public class LocationDbRecord {
     private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     );
-    public LocationDbRecord(Long Id, String dateTime, Double latitude, Double longitude,
-                            Float accuracy, String message, String deviceId, String provider){
+    public LocationDbRecord(Long Id, String dateTime, String deviceId, Double latitude, Double longitude,
+                            Float accuracy,  String provider, String message ){
 
         this.Id = Id;
         this.dateTime = dateTime;
