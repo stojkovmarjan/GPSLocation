@@ -22,16 +22,31 @@ public class LocationDbRecord {
     private final String message;
     private final String deviceId;
     private final String provider;
+    private final Long Id;
     private static final DecimalFormat df = new DecimalFormat("0.00");
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     );
+    public LocationDbRecord(Long Id, String dateTime, Double latitude, Double longitude,
+                            Float accuracy, String message, String deviceId, String provider){
+
+        this.Id = Id;
+        this.dateTime = dateTime;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.accuracy = accuracy;
+        this.message = message;
+        this.deviceId = deviceId;
+        this.provider = provider;
+
+    }
     @SuppressLint("HardwareIds")
     public LocationDbRecord(Context context, Location location, String message){
 
         this.deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
+        this.Id = -1L;
         this.dateTime = locationDateFormat.format(location.getTime());
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
@@ -69,6 +84,9 @@ public class LocationDbRecord {
     public String getMessage(){
         return this.message;
     }
+    public Long getId(){
+        return this.Id;
+    }
     public JSONObject getLocationJson(){
 
         JSONObject jsonParam = new JSONObject();
@@ -83,7 +101,6 @@ public class LocationDbRecord {
         } catch (JSONException e) {
             Log.e("LOCATION DB RECORD","Conversion to JSON failed!");
             e.printStackTrace();
-
         }
         return  jsonParam;
     }

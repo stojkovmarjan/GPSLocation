@@ -2,21 +2,16 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class GPSStickyService extends Service implements  GPSListenerOnChange{
     GPSListener gpsListener;
@@ -90,11 +85,6 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
                 .setSmallIcon(R.drawable.ic_launcher_background);
     }
 
-    /**
-     * listens to location changes in GPSListener class
-     * @param location, Location from location provider
-     * @param msg, String, message in context of the location data
-     */
     @Override
     public void onLocationSubmit(Location location, String msg) {
 
