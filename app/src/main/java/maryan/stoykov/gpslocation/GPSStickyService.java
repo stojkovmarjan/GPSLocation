@@ -13,8 +13,12 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-public class GPSStickyService extends Service implements  GPSListenerOnChange{
+import java.util.List;
+
+public class GPSStickyService extends Service
+        implements  GPSListenerOnChange, PostLocationResponseListener {
     GPSListener gpsListener;
+    PostLocationResponseListener postLocationResponseListener;
     String serviceSignalMsg = "";
 
     @Override
@@ -46,7 +50,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        serviceSignalMsg = "SERVICE IS STARTED ON BOOT";
+        serviceSignalMsg = "SERVICE IS STARTED ON DEVICE BOOT";
 
         if (intent.hasExtra("SIGNAL")){
             serviceSignalMsg = intent.getExtras().getString("SIGNAL");
@@ -97,11 +101,75 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
         Log.i("GPSStickyService", location.toString());
 
-        LocationSaver post = new LocationSaver(this, "https://pijo.linkpc.net/api/location");
+        PostLocation postLocation = new PostLocation(
+                "https://pijo.linkpc.net/api/location", this);
 
         LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
 
-        post.sendPost(locationDbRecord);
+        postLocation.sendPost(locationDbRecord);
 
+    }
+
+    private void postDbRecords(){
+
+        List<LocationDbRecord> locationDbRecords;
+
+        try (DBHelper dbHelper = new DBHelper(this)) {
+
+            if (dbHelper.getRecordsCount() <= 0) return;
+
+            Log.i("POST CLASS", "DB has records");
+
+            locationDbRecords = dbHelper.getLocationsList();
+        }
+
+        for (LocationDbRecord locationDbRecord: locationDbRecords ) {
+            PostLocation postLocation = new PostLocation(
+                    "https://pijo.linkpc.net/api/location", this);
+            postLocation.sendPost(locationDbRecord);
+        }
+
+    }
+
+    private void writeToDb(LocationDbRecord locationDbRecord){
+
+        Long rowId;
+
+        try (DBHelper db = new DBHelper(this)) {
+
+            rowId = db.addLocation(locationDbRecord);
+        }
+
+        if (rowId > -1) {
+            Log.i("GPSStickyService","Location is added to local db!");
+        } else {
+            Log.e("GPSStickyService","Write to db failed!");
+        }
+    }
+
+    private void deleteDbRecord(Long id){
+        try (DBHelper dbHelper = new DBHelper(this)) {
+            dbHelper.deleteLocationRecord(id);
+        }
+    }
+
+    @Override
+    public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
+        switch (responseCode){
+            case 200:
+                Log.i("GPSStickyService","Response reseived "+responseCode
+                        +"\nData sent to server!");
+                if (locationDbRecord.getId() > -1){
+                    deleteDbRecord(locationDbRecord.getId());
+                } else {
+                    postDbRecords();
+                }
+                break;
+            case 400:
+                Log.e("GPSStickyService","ENDPOINT NOT AVAILABLE");
+                Log.i("GPSStickyService","Response reseived "+responseCode);
+                if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
+                break;
+        }
     }
 }
