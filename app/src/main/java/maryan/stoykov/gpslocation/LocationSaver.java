@@ -44,13 +44,17 @@ public class LocationSaver {
                     Log.i("POST CLASS" , conn.getResponseMessage());
                     Log.i("POST CLASS","Response code: "+ conn.getResponseCode());
 
-                    if (conn.getResponseCode() == 200){
-                        checkDatabase();
+                    if (conn.getResponseCode() == 200 && locationDbRecord.getId() == -1){
+                        postDbRecords();
+                    }
+
+                    if (conn.getResponseCode() == 200 && locationDbRecord.getId() > -1){
+                        deleteDbRecord(locationDbRecord.getId());
                     }
 
                 } catch (Exception e) {
                     Log.e("POST CLASS","ENDPOINT NOT AVAILABLE");
-                    writeToDb(locationDbRecord);
+                    if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
                 } finally {
                     conn.disconnect();
                 }
@@ -60,17 +64,35 @@ public class LocationSaver {
         thread.start();
     }
 
-    /** @noinspection resource*/
-    private void checkDatabase(){
+    private void postDbRecords(){
 
-        DBHelper dbHelper = new DBHelper(context);
+        List<LocationDbRecord> locationDbRecords;
 
-        if (dbHelper.getRecordsCount()<=0) return;
+        try (DBHelper dbHelper = new DBHelper(context)) {
 
-        Log.i("POST CLASS","DB has records");
+            if (dbHelper.getRecordsCount() <= 0) return;
 
-        List<LocationDbRecord> locationDbRecords = dbHelper.getLocationsList();
+            Log.i("POST CLASS", "DB has records");
 
+            locationDbRecords = dbHelper.getLocationsList();
+        }
+
+        for (LocationDbRecord locationDbRecord: locationDbRecords ) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendPost(locationDbRecord);
+                }
+            });
+            thread.start();
+        }
+
+    }
+
+    private void deleteDbRecord(Long id){
+        try (DBHelper dbHelper = new DBHelper(context)) {
+            dbHelper.deleteLocationRecord(id);
+        }
     }
 
     private void writeToDb(LocationDbRecord locationDbRecord){

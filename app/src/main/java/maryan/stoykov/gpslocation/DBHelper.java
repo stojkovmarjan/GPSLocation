@@ -65,25 +65,21 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return newRowId;
     }
-    private Cursor getCursor() {
+    public List<LocationDbRecord> getLocationsList(){
 
         SQLiteDatabase db = this.getReadableDatabase();
 
+        Cursor cursor = null;
+
         try {
             String query = "SELECT * FROM "+ DBHelper.LOCATIONS_TABLE;
-            return db.rawQuery(query, null);
+            cursor = db.rawQuery(query, null);
         } catch (Exception e) {
             Log.e("DBHelper", "Error creating cursor");
             e.printStackTrace();
-            return null;
         }
-    }
 
-    public List<LocationDbRecord> getLocationsList(){
-
-        Cursor cursor = this.getCursor();
-
-        List<LocationDbRecord> locationDbRecords = new ArrayList<LocationDbRecord>();
+        List<LocationDbRecord> locationDbRecords = new ArrayList<>();
 
         if (cursor != null){
             try {
@@ -110,13 +106,30 @@ public class DBHelper extends SQLiteOpenHelper {
                 e.printStackTrace();
             } finally {
                 cursor.close();
+                db.close();
             }
         }
 
         return locationDbRecords;
     }
+
+    public void deleteLocationRecord(long id) {
+
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+
+            String whereClause = "Id = ?";
+            String[] whereArgs = {String.valueOf(id)};
+            db.delete(LOCATIONS_TABLE, whereClause, whereArgs);
+            Log.i("DBHelper", id+" deleted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
     public int getRecordsCount() {
+
         SQLiteDatabase db = this.getReadableDatabase();
+
         int count = 0;
 
         try {
@@ -129,9 +142,10 @@ public class DBHelper extends SQLiteOpenHelper {
             cursor.close();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
             db.close();
         }
+
+        db.close();
 
         return count;
     }

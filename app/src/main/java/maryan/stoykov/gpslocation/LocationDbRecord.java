@@ -22,16 +22,16 @@ public class LocationDbRecord {
     private final String message;
     private final String deviceId;
     private final String provider;
-    private final Long Id;
+    private final Long id;
     private static final DecimalFormat df = new DecimalFormat("0.00");
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     );
-    public LocationDbRecord(Long Id, String dateTime, String deviceId, Double latitude, Double longitude,
+    public LocationDbRecord(Long id, String dateTime, String deviceId, Double latitude, Double longitude,
                             Float accuracy,  String provider, String message ){
 
-        this.Id = Id;
+        this.id = id;
         this.dateTime = dateTime;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -46,7 +46,7 @@ public class LocationDbRecord {
 
         this.deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        this.Id = -1L;
+        this.id = -1L;
         this.dateTime = locationDateFormat.format(location.getTime());
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
@@ -56,7 +56,8 @@ public class LocationDbRecord {
     }
     @NonNull
     public String toString(){
-        return dateTime+", "+
+        return this.id+", "+
+                this.dateTime+", "+
                 this.longitude+", "+
                 this.longitude+", "+
                 this.longitude+", "+
@@ -85,12 +86,14 @@ public class LocationDbRecord {
         return this.message;
     }
     public Long getId(){
-        return this.Id;
+        return this.id;
     }
     public JSONObject getLocationJson(){
 
         JSONObject jsonParam = new JSONObject();
+
         try {
+
             jsonParam.put("time", this.dateTime);
             jsonParam.put("deviceId", this.deviceId);
             jsonParam.put("latitude", this.latitude);
@@ -98,6 +101,7 @@ public class LocationDbRecord {
             jsonParam.put("accuracy", df.format(this.accuracy));
             jsonParam.put("provider",this.provider);
             jsonParam.put("message",this.message);
+
         } catch (JSONException e) {
             Log.e("LOCATION DB RECORD","Conversion to JSON failed!");
             e.printStackTrace();
