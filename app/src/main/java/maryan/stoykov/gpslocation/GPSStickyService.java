@@ -97,7 +97,7 @@ public class GPSStickyService extends Service implements  GPSListenerOnChange{
 
         Log.i("GPSStickyService", location.toString());
 
-        Post post = new Post(this, "https://pijo.linkpc.net/api/location");
+        LocationSaver post = new LocationSaver(this, "https://pijo.linkpc.net/api/location");
 
         LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
 

@@ -8,12 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-public class Post {
+public class LocationSaver {
     private final Context context;
     private final String endpointURL;
     private HttpURLConnection conn;
 
-    public Post(Context context, String endpointURL) {
+    public LocationSaver(Context context, String endpointURL) {
         this.context = context;
         this.endpointURL = endpointURL;
     }
