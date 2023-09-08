@@ -7,6 +7,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
@@ -14,21 +15,31 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 public class GPSStickyService extends Service
         implements  GPSListenerOnChange, PostLocationResponseListener {
-    GPSListener gpsListener;
-    PostLocationResponseListener postLocationResponseListener;
-    String serviceSignalMsg = "";
+    private GPSListener gpsListener;
+    private PostLocationResponseListener postLocationResponseListener;
+    private String serviceSignalMsg = "";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        BootReceiver receiver = new BootReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
+        filter.addAction(Intent.ACTION_SHUTDOWN);
+        registerReceiver(receiver, filter);
+    }
 
     @Override
     public void onDestroy() {
 
         super.onDestroy();
 
-        Log.d("GPSStickyService","SERVICE DESTROY");
+        Log.d("GPSStickyService","SERVICE STOPPED BY USER");
 
-        serviceSignalMsg = "SERVICE IS DESTROYED MSG";
+        serviceSignalMsg = "SERVICE STOPPED BY USER";
 
         onLocationSubmit(gpsListener.getLocation(),serviceSignalMsg);
 
@@ -37,30 +48,34 @@ public class GPSStickyService extends Service
         gpsListener = null;
 
         stopForeground(true);
-
     }
 
     @Override
     public boolean stopService(Intent name) {
-
         return super.stopService(name);
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        serviceSignalMsg = "SERVICE IS STARTED ON DEVICE BOOT";
+        serviceSignalMsg = "SERVICE STARTED ON BOOT";
 
+        // signal received from intent (context.startForegroundService(serviceIntent);)
         if (intent.hasExtra("SIGNAL")){
-            serviceSignalMsg = intent.getExtras().getString("SIGNAL");
+            serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
+            assert serviceSignalMsg != null;
+            Log.i("SIGNAL",serviceSignalMsg);
+            if (gpsListener != null) {
+                Log.d("GPSStickyService","GPS NOT NULL");
+                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
+            }
         }
 
         gpsListener = new GPSListener(this, this);
-
         gpsListener.requestLocation();
 
         Log.d("GPSStickyService","START");
+
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
@@ -106,7 +121,6 @@ public class GPSStickyService extends Service
         LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
 
         postLocation.sendPost(locationDbRecord);
-
     }
 
     @Override
@@ -124,7 +138,6 @@ public class GPSStickyService extends Service
             Log.e("GPSStickyService","ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
         }
-
     }
     private void postDbRecords(){
 
@@ -144,7 +157,6 @@ public class GPSStickyService extends Service
                     "https://pijo.linkpc.net/api/location", this);
             postLocation.sendPost(locationDbRecord);
         }
-
     }
 
     private void writeToDb(LocationDbRecord locationDbRecord){
@@ -173,6 +185,6 @@ public class GPSStickyService extends Service
         if (rowsDeleted == -1) {
             Log.e("GPSStickyService","Deleting a record failed!");
         }
-
     }
+
 }
