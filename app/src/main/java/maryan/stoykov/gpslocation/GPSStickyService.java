@@ -71,7 +71,6 @@ public class GPSStickyService extends Service
     public IBinder onBind(Intent intent) {
         return null;
     }
-
     private Notification.Builder SetNotification () {
         final String CHANNEL_ID = "My Foreground ID";
 
@@ -110,6 +109,23 @@ public class GPSStickyService extends Service
 
     }
 
+    @Override
+    public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
+
+        Log.i("GPSStickyService","Serever responded with code "+responseCode);
+
+        if (responseCode >= 200 && responseCode<300){
+            if (locationDbRecord.getId() > -1){
+                deleteDbRecord(locationDbRecord.getId());
+            } else {
+                postDbRecords();
+            }
+        } else {
+            Log.e("GPSStickyService","ENDPOINT NOT AVAILABLE");
+            if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
+        }
+
+    }
     private void postDbRecords(){
 
         List<LocationDbRecord> locationDbRecords;
@@ -148,28 +164,15 @@ public class GPSStickyService extends Service
     }
 
     private void deleteDbRecord(Long id){
+        Log.i("GPSStickyService","Deleting a record!");
+        int rowsDeleted = -1;
         try (DBHelper dbHelper = new DBHelper(this)) {
-            dbHelper.deleteLocationRecord(id);
+            rowsDeleted = dbHelper.deleteLocationRecord(id);
         }
-    }
 
-    @Override
-    public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
-        switch (responseCode){
-            case 200:
-                Log.i("GPSStickyService","Response reseived "+responseCode
-                        +"\nData sent to server!");
-                if (locationDbRecord.getId() > -1){
-                    deleteDbRecord(locationDbRecord.getId());
-                } else {
-                    postDbRecords();
-                }
-                break;
-            case 400:
-                Log.e("GPSStickyService","ENDPOINT NOT AVAILABLE");
-                Log.i("GPSStickyService","Response reseived "+responseCode);
-                if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
-                break;
+        if (rowsDeleted == -1) {
+            Log.e("GPSStickyService","Deleting a record failed!");
         }
+
     }
 }

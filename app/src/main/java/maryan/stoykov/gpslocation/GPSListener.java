@@ -41,12 +41,12 @@ public class GPSListener implements LocationListener {
 
         Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
 
-        if (location.getProvider().equals(LocationManager.GPS_PROVIDER)){
+        if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
             lastGPSLocation = location;
-        } else if (location.getProvider().equals(LocationManager.NETWORK_PROVIDER)){
+        } else if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())){
                 lastNetworkLocation = location;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            if (location.getProvider().equals(LocationManager.FUSED_PROVIDER)){
+            if (LocationManager.FUSED_PROVIDER.equals(location.getProvider())){
                 this.lastFusedLocation = location;
             }
         }

@@ -19,7 +19,6 @@ public class PostLocation {
     }
 
     public void sendPost(LocationDbRecord locationDbRecord) {
-
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -29,6 +28,7 @@ public class PostLocation {
                     java.net.URL url = new URL(endpointURL);
 
                     conn = (HttpURLConnection) url.openConnection();
+
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                     conn.setRequestProperty("Accept","application/json");
@@ -42,11 +42,14 @@ public class PostLocation {
                     os.flush();
                     os.close();
 
-                    postLocationResponseListener.onHttpResponse(conn.getResponseCode(), locationDbRecord);
+                    postLocationResponseListener.onHttpResponse(
+                            conn.getResponseCode(), locationDbRecord
+                    );
 
                 } catch (Exception e) {
-                    postLocationResponseListener.onHttpResponse(400, locationDbRecord);
-                    e.printStackTrace();
+                    postLocationResponseListener.onHttpResponse(
+                            404, locationDbRecord
+                    );
                 } finally {
                     conn.disconnect();
                 }
