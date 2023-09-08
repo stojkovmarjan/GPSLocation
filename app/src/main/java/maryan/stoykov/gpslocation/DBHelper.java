@@ -39,6 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
 
     }
+    /** @noinspection ReassignedVariable*/
     public Long addLocation(LocationDbRecord locationDbRecord){
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -113,16 +114,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return locationDbRecords;
     }
 
-    public void deleteLocationRecord(long id) {
+    public int deleteLocationRecord(long id) {
 
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
             String whereClause = "Id = ?";
             String[] whereArgs = {String.valueOf(id)};
-            db.delete(LOCATIONS_TABLE, whereClause, whereArgs);
+            int rowsDeleted = db.delete(LOCATIONS_TABLE, whereClause, whereArgs);
             Log.i("DBHelper", id+" deleted");
+            return rowsDeleted;
         } catch (Exception e) {
             e.printStackTrace();
+            return -1;
         }
 
     }
