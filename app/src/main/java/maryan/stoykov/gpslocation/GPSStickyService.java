@@ -23,11 +23,12 @@ public class GPSStickyService extends Service
     private GPSListener gpsListener;
     private PostLocationResponseListener postLocationResponseListener;
     private String serviceSignalMsg = "";
+    private BootReceiver receiver;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        BootReceiver receiver = new BootReceiver();
+        receiver = new BootReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
         filter.addAction(Intent.ACTION_SHUTDOWN);
         registerReceiver(receiver, filter);
@@ -37,6 +38,8 @@ public class GPSStickyService extends Service
     public void onDestroy() {
 
         super.onDestroy();
+
+        unregisterReceiver(receiver);
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
@@ -73,6 +76,7 @@ public class GPSStickyService extends Service
         }
 
         gpsListener = new GPSListener(this, this);
+
         gpsListener.requestLocation();
 
         Log.d(className,"START");

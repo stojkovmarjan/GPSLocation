@@ -62,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
                 if (serviceIntent == null) {
                     serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
                 }
+
                 stopService(serviceIntent);
+
                 serviceIntent = null;
             }
         });

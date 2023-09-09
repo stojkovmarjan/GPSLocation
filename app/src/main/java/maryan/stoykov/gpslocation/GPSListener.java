@@ -1,85 +1,63 @@
 package maryan.stoykov.gpslocation;
 
-import static android.content.Context.LOCATION_SERVICE;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import java.util.Objects;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Granularity;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 
 /**
  * provides the main service with location data
  * taken from the FUSED LOCATION provider
  */
-public class GPSListener implements LocationListener {
+public class GPSListener  {
     private final String className = this.getClass().getSimpleName();
     private final Context context;
     private LocationManager locationManager;
     private Location location = null;
     private final Long updateTime = 1000L*60*1;
-    private final float updateDistance = 0f;
-    private Location networkLocation = null;
-    private Location fusedLocation = null;
-    private boolean fusedProviderEnabled = false;
+    private final Long minUpdateTime = updateTime / 3;
+    private final float minUpdateDistance = 4.5f;
+    public Location getLocation(){
+        return this.location;
+    }
+    private void setLocation(Location location) {
+        this.location = location;
+    }
+
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
+    private final FusedLocationProviderClient fusedLocationClient;
+    private final LocationCallback locationCallback  = new LocationCallback() {
+        @Override
+        public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
+            super.onLocationAvailability(locationAvailability);
+        }
+        @Override
+        public void onLocationResult(@NonNull LocationResult locationResult) {
+            setLocation(locationResult.getLastLocation());
+            gpsListenerOnChange.onLocationSubmit(locationResult.getLastLocation(),"");
+        }
+    };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         this.context = context;
 
-        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-
         this.gpsListenerOnChange = gpsListenerOnChange; // event emitter / listener
 
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-
-        Log.i(className, "GPS onLocationChanged event"+" "+location.getProvider());
-
-        this.location = location;
-
-        if (!fusedProviderEnabled) {
-            this.location = networkLocation;
-            gpsListenerOnChange.onLocationSubmit(this.location, "");
-            return;
-        }
-
-        if (Objects.equals(location.getProvider(), LocationManager.FUSED_PROVIDER)){
-            this.fusedLocation = location;
-            if (networkLocation == null) return;
-        }
-
-        if (Objects.equals(location.getProvider(), LocationManager.NETWORK_PROVIDER)){
-            this.networkLocation = location;
-            if (fusedLocation == null) return;
-        }
-
-        if (fusedLocation != null && networkLocation != null){
-            this.location = chooseBetterLocation(this.fusedLocation, this.networkLocation);
-            this.networkLocation = null;
-            this.fusedLocation = null;
-            gpsListenerOnChange.onLocationSubmit(this.location, "");
-        }
-
-    }
-
-    Location chooseBetterLocation(Location fusedLocation, Location networkLocation){
-
-        if (networkLocation.getAccuracy() <= fusedLocation.getAccuracy()){
-            return networkLocation;
-        }
-
-        return fusedLocation;
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
     protected void requestLocation() {
@@ -98,37 +76,23 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                updateTime, updateDistance, this);
+//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+//                updateTime, updateDistance, this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-                fusedProviderEnabled = true;
-                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        updateTime, updateDistance, this);
+                LocationRequest locationRequest = new LocationRequest.Builder(updateTime)
+                        .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                        .setMinUpdateIntervalMillis(minUpdateTime)
+                        .setMinUpdateDistanceMeters(minUpdateDistance)
+                        .setGranularity(Granularity.GRANULARITY_FINE)
+                        .build();
+
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
             }
 
         }
-
-    public Location getLocation(){
-        return this.location;
-    }
-
-
-    @Override
-    public void onProviderEnabled(@NonNull String provider) {
-        Log.i(className,provider+" enabled");
-        //LocationListener.super.onProviderEnabled(provider);
-    }
-
-    @Override
-    public void onProviderDisabled(@NonNull String provider) {
-        Log.i(className,provider+" disabled");
-        //LocationListener.super.onProviderDisabled(provider);
-    }
-
     public void stopLocationUpdate(){
-        locationManager.removeUpdates(this);
-        locationManager = null;
+        fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
 }
