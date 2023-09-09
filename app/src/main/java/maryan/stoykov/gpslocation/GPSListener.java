@@ -14,6 +14,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import java.util.Objects;
+
 /**
  * provides the main service with location data
  * taken from the FUSED LOCATION provider
@@ -23,9 +25,11 @@ public class GPSListener implements LocationListener {
     private final Context context;
     private LocationManager locationManager;
     private Location location = null;
-    private Location lastGPSLocation = null;
-    private Location lastNetworkLocation = null;
-    private Location lastFusedLocation = null;
+    private final Long updateTime = 1000L*60*1;
+    private final float updateDistance = 0f;
+    private Location networkLocation = null;
+    private Location fusedLocation = null;
+    private boolean fusedProviderEnabled = false;
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
@@ -42,63 +46,40 @@ public class GPSListener implements LocationListener {
 
         Log.i(className, "GPS onLocationChanged event"+" "+location.getProvider());
 
-        if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
-            lastGPSLocation = location;
-        } else if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())){
-                lastNetworkLocation = location;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-            if (LocationManager.FUSED_PROVIDER.equals(location.getProvider())){
-                this.lastFusedLocation = location;
-            }
-        }
+        this.location = location;
 
-        if (this.location != null && chooseBetterLocation().equals(this.location)){
-            Log.i(className, "GPS onLocationChanged same as last "+" "
-                    +this.location.getProvider());
+        if (!fusedProviderEnabled) {
+            this.location = networkLocation;
+            gpsListenerOnChange.onLocationSubmit(this.location, "");
             return;
-        } else {
-            this.location = chooseBetterLocation();
         }
 
-        if (this.location == null) this.location = location;
+        if (Objects.equals(location.getProvider(), LocationManager.FUSED_PROVIDER)){
+            this.fusedLocation = location;
+            if (networkLocation == null) return;
+        }
 
-        Log.i(className, "GPS onLocationChanged best provider "+" "
-                +this.location.getProvider());
+        if (Objects.equals(location.getProvider(), LocationManager.NETWORK_PROVIDER)){
+            this.networkLocation = location;
+            if (fusedLocation == null) return;
+        }
 
-        gpsListenerOnChange.onLocationSubmit(this.location, "");// emit event to sticky service
+        if (fusedLocation != null && networkLocation != null){
+            this.location = chooseBetterLocation(this.fusedLocation, this.networkLocation);
+            this.networkLocation = null;
+            this.fusedLocation = null;
+            gpsListenerOnChange.onLocationSubmit(this.location, "");
+        }
 
     }
 
-    /**
-     * compares the accuracy of locations provided from
-     * gps, fused and network provider, returns the one with
-     * better accuracy
-     * @return location
-     */
-    Location chooseBetterLocation(){
+    Location chooseBetterLocation(Location fusedLocation, Location networkLocation){
 
-        Location chosenLocation = null;
-
-        if (lastGPSLocation != null && lastNetworkLocation != null) {
-            if (lastGPSLocation.getAccuracy() < lastNetworkLocation.getAccuracy()) {
-                chosenLocation = lastGPSLocation;
-            } else {
-                chosenLocation = lastNetworkLocation;
-            }
-        } else if (lastGPSLocation != null) {
-            chosenLocation = lastGPSLocation;
-        } else if (lastNetworkLocation != null){
-            chosenLocation = lastNetworkLocation;
+        if (networkLocation.getAccuracy() <= fusedLocation.getAccuracy()){
+            return networkLocation;
         }
 
-        if (lastFusedLocation != null && chosenLocation != null
-                && chosenLocation.getAccuracy() > lastFusedLocation.getAccuracy()){
-                chosenLocation = lastFusedLocation;
-        } if (chosenLocation == null) {
-            chosenLocation = lastNetworkLocation;
-        }
-
-        return chosenLocation;
+        return fusedLocation;
     }
 
     protected void requestLocation() {
@@ -117,15 +98,13 @@ public class GPSListener implements LocationListener {
                 return;
             }
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000L * 30 * 1, 0f, this);
-
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                1000L * 30 * 1, 0f, this);
+                updateTime, updateDistance, this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                fusedProviderEnabled = true;
                 locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER,
-                        1000L * 30 * 1, 0f, this);
+                        updateTime, updateDistance, this);
             }
 
         }

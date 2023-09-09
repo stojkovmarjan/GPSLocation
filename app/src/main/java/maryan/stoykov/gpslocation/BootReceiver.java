@@ -17,7 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
             if (intent.getAction().equals(Intent.ACTION_REBOOT)) {
                 serviceIntent.putExtra("SIGNAL","POWER OFF or REBOOT");
             } else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
-                serviceIntent.putExtra("SIGNAL","REBOOT");
+                serviceIntent.putExtra("SIGNAL","POWER OFF or REBOOT");
             } else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
                 serviceIntent.putExtra("SIGNAL","SERVICE STARTED ON BOOT");
             }
