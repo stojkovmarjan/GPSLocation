@@ -19,12 +19,13 @@ import androidx.core.app.ActivityCompat;
  * taken from the FUSED LOCATION provider
  */
 public class GPSListener implements LocationListener {
-    Context context;
-    LocationManager locationManager;
-    Location location = null;
-    Location lastGPSLocation = null;
-    Location lastNetworkLocation = null;
-    Location lastFusedLocation = null;
+    private final String className = this.getClass().getSimpleName();
+    private final Context context;
+    private LocationManager locationManager;
+    private Location location = null;
+    private Location lastGPSLocation = null;
+    private Location lastNetworkLocation = null;
+    private Location lastFusedLocation = null;
     GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
@@ -39,7 +40,7 @@ public class GPSListener implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+        Log.i(className, "GPS onLocationChanged event"+" "+location.getProvider());
 
         if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
             lastGPSLocation = location;
@@ -52,7 +53,7 @@ public class GPSListener implements LocationListener {
         }
 
         if (this.location != null && chooseBetterLocation().equals(this.location)){
-            Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
+            Log.i(className, "GPS onLocationChanged same as last "+" "
                     +this.location.getProvider());
             return;
         } else {
@@ -61,7 +62,7 @@ public class GPSListener implements LocationListener {
 
         if (this.location == null) this.location = location;
 
-        Log.i("GPSListener:", "GPS onLocationChanged best provider "+" "
+        Log.i(className, "GPS onLocationChanged best provider "+" "
                 +this.location.getProvider());
 
         gpsListenerOnChange.onLocationSubmit(this.location, "");// emit event to sticky service
@@ -136,12 +137,14 @@ public class GPSListener implements LocationListener {
 
     @Override
     public void onProviderEnabled(@NonNull String provider) {
-        LocationListener.super.onProviderEnabled(provider);
+        Log.i(className,provider+" enabled");
+        //LocationListener.super.onProviderEnabled(provider);
     }
 
     @Override
     public void onProviderDisabled(@NonNull String provider) {
-        LocationListener.super.onProviderDisabled(provider);
+        Log.i(className,provider+" disabled");
+        //LocationListener.super.onProviderDisabled(provider);
     }
 
     public void stopLocationUpdate(){

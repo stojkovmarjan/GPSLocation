@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 public class LocationDbRecord {
+    private final String className = this.getClass().getSimpleName();
     private final String dateTime;
     private final Double latitude;
     private final Double longitude;
@@ -103,7 +104,7 @@ public class LocationDbRecord {
             jsonParam.put("message",this.message);
 
         } catch (JSONException e) {
-            Log.e("LOCATION DB RECORD","Conversion to JSON failed!");
+            Log.e(className,"Conversion to JSON failed!");
             e.printStackTrace();
         }
         return  jsonParam;

@@ -5,7 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class PostLocation {
-    //private final Context context;
+    private final String className = this.getClass().getSimpleName();
     private final String endpointURL;
     private HttpURLConnection conn;
     private int responseCode;

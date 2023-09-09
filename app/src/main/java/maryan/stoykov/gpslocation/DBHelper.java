@@ -14,6 +14,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
+    private final String className = this.getClass().getSimpleName();
     private static final String DATABASE_NAME = "tracking.db";
     private static final int DATABASE_VERSION = 1;
     private static final String LOCATIONS_TABLE = "Locations";
@@ -76,7 +77,7 @@ public class DBHelper extends SQLiteOpenHelper {
             String query = "SELECT * FROM "+ DBHelper.LOCATIONS_TABLE;
             cursor = db.rawQuery(query, null);
         } catch (Exception e) {
-            Log.e("DBHelper", "Error creating cursor");
+            Log.e(className, "Error creating cursor");
             e.printStackTrace();
         }
 
@@ -103,7 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
 
             } catch (Exception e){
-                Log.e("DBHelper", "Error creating locations list from DB");
+                Log.e(className, "Error creating locations list from DB");
                 e.printStackTrace();
             } finally {
                 cursor.close();
@@ -121,7 +122,7 @@ public class DBHelper extends SQLiteOpenHelper {
             String whereClause = "Id = ?";
             String[] whereArgs = {String.valueOf(id)};
             int rowsDeleted = db.delete(LOCATIONS_TABLE, whereClause, whereArgs);
-            Log.i("DBHelper", id+" deleted");
+            Log.i(className, id+" deleted");
             return rowsDeleted;
         } catch (Exception e) {
             e.printStackTrace();

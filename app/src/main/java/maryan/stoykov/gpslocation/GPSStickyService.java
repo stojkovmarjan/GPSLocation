@@ -19,6 +19,7 @@ import java.util.Objects;
 
 public class GPSStickyService extends Service
         implements  GPSListenerOnChange, PostLocationResponseListener {
+    private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
     private PostLocationResponseListener postLocationResponseListener;
     private String serviceSignalMsg = "";
@@ -37,7 +38,7 @@ public class GPSStickyService extends Service
 
         super.onDestroy();
 
-        Log.d("GPSStickyService","SERVICE STOPPED BY USER");
+        Log.d(className,"SERVICE STOPPED BY USER");
 
         serviceSignalMsg = "SERVICE STOPPED BY USER";
 
@@ -64,9 +65,9 @@ public class GPSStickyService extends Service
         if (intent.hasExtra("SIGNAL")){
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
             assert serviceSignalMsg != null;
-            Log.i("SIGNAL",serviceSignalMsg);
+            Log.i(className,"SIGNAL: "+serviceSignalMsg);
             if (gpsListener != null) {
-                Log.d("GPSStickyService","GPS NOT NULL");
+                Log.d(className,"GPS NOT NULL");
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
             }
         }
@@ -74,7 +75,7 @@ public class GPSStickyService extends Service
         gpsListener = new GPSListener(this, this);
         gpsListener.requestLocation();
 
-        Log.d("GPSStickyService","START");
+        Log.d(className,"START");
 
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         //return super.onStartCommand(intent, flags, startId);
@@ -111,9 +112,9 @@ public class GPSStickyService extends Service
             serviceSignalMsg = "";
         }
 
-        Log.i("GPSStickyService", "LOCATION CHANGED EVENT");
+        Log.i(className, "LOCATION CHANGED EVENT");
 
-        Log.i("GPSStickyService", location.toString());
+        Log.i(className, location.toString());
 
         PostLocation postLocation = new PostLocation(
                 "https://pijo.linkpc.net/api/location", this);
@@ -126,7 +127,7 @@ public class GPSStickyService extends Service
     @Override
     public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
 
-        Log.i("GPSStickyService","Serever responded with code "+responseCode);
+        Log.i(className,"Serever responded with code "+responseCode);
 
         if (responseCode >= 200 && responseCode<300){
             if (locationDbRecord.getId() > -1){
@@ -135,7 +136,7 @@ public class GPSStickyService extends Service
                 postDbRecords();
             }
         } else {
-            Log.e("GPSStickyService","ENDPOINT NOT AVAILABLE");
+            Log.e(className,"ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
         }
     }
@@ -147,7 +148,7 @@ public class GPSStickyService extends Service
 
             if (dbHelper.getRecordsCount() <= 0) return;
 
-            Log.i("POST CLASS", "DB has records");
+            Log.i(className, "DB has records");
 
             locationDbRecords = dbHelper.getLocationsList();
         }
@@ -169,21 +170,21 @@ public class GPSStickyService extends Service
         }
 
         if (rowId > -1) {
-            Log.i("GPSStickyService","Location is added to local db!");
+            Log.i(className,"Location is added to local db!");
         } else {
-            Log.e("GPSStickyService","Write to db failed!");
+            Log.e(className,"Write to db failed!");
         }
     }
 
     private void deleteDbRecord(Long id){
-        Log.i("GPSStickyService","Deleting a record!");
+        Log.i(className,"Deleting a record!");
         int rowsDeleted = -1;
         try (DBHelper dbHelper = new DBHelper(this)) {
             rowsDeleted = dbHelper.deleteLocationRecord(id);
         }
 
         if (rowsDeleted == -1) {
-            Log.e("GPSStickyService","Deleting a record failed!");
+            Log.e(className,"Deleting a record failed!");
         }
     }
 
