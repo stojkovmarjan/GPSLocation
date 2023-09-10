@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation;
 
+import static android.content.Context.LOCATION_SERVICE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,7 +37,7 @@ public class GPSListener implements LocationListener {
     private Location location = null;
     private final Long updateTime = 1000L*60*1;
     private final Long minUpdateTime = updateTime / 3;
-    private final float minUpdateDistance = 4.5f;
+    private final float minUpdateDistance = 0f;
     private Location lastGPSLocation = null;
     private Location lastNetworkLocation = null;
     public Location getLocation(){
@@ -63,6 +65,8 @@ public class GPSListener implements LocationListener {
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         this.context = context;
+
+        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
 
         this.gpsListenerOnChange = gpsListenerOnChange; // event emitter / listener
 
