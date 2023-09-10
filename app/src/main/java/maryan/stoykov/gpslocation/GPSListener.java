@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -35,6 +36,8 @@ public class GPSListener implements LocationListener {
     private final Long updateTime = 1000L*60*1;
     private final Long minUpdateTime = updateTime / 3;
     private final float minUpdateDistance = 4.5f;
+    private Location lastGPSLocation = null;
+    private Location lastNetworkLocation = null;
     public Location getLocation(){
         return this.location;
     }
@@ -44,6 +47,8 @@ public class GPSListener implements LocationListener {
 
     private final GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     private final FusedLocationProviderClient fusedLocationClient;
+
+    // listeners for FusedLocationProviderClient
     private final LocationCallback locationCallback  = new LocationCallback() {
         @Override
         public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
@@ -88,8 +93,9 @@ public class GPSListener implements LocationListener {
 
     }
 
-
-    // permission is checked in requestLocation() method before those 3 methods are called
+    /* permission is checked in requestLocation() method before the next 3 methods are called,
+    should be ok for now, ignore @SuppressLint("MissingPermission")
+     */
     @SuppressLint("MissingPermission")
     private void startUsingNetworkProvider(){
         locationManager.requestLocationUpdates(
@@ -112,9 +118,55 @@ public class GPSListener implements LocationListener {
 
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
+
+    /* listener for GPS and Network provider
+     won't call chooseBetterLocation until both network and gps location are obtained
+     */
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
+        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+
+        if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
+            lastGPSLocation = location;
+        } else if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())){
+            lastNetworkLocation = location;
+        }
+
+        if (this.location != null && chooseBetterLocation().equals(this.location)){
+            Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
+                    +this.location.getProvider());
+            return;
+        } else {
+            this.location = chooseBetterLocation();
+        }
+
+        if (this.location == null) this.location = location;
+
+        Log.i("GPSListener:", "GPS onLocationChanged best provider "+" "
+                +this.location.getProvider());
+
+        gpsListenerOnChange.onLocationSubmit(this.location, "");// emit event to sticky service
+    }
+
+    // choose between Network and Gps provided locations
+    Location chooseBetterLocation(){
+
+        Location chosenLocation = null;
+
+        if (lastGPSLocation != null && lastNetworkLocation != null) {
+            if (lastGPSLocation.getAccuracy() < lastNetworkLocation.getAccuracy()) {
+                chosenLocation = lastGPSLocation;
+            } else {
+                chosenLocation = lastNetworkLocation;
+            }
+        } else if (lastGPSLocation != null) {
+            chosenLocation = lastGPSLocation;
+        } else if (lastNetworkLocation != null){
+            chosenLocation = lastNetworkLocation;
+        }
+
+        return chosenLocation;
     }
 
     @Override
