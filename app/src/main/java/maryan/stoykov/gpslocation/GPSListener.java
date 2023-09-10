@@ -33,7 +33,7 @@ import java.util.List;
 public class GPSListener implements LocationListener {
     private final String className = this.getClass().getSimpleName();
     private final Context context;
-    private LocationManager locationManager;
+    private final LocationManager locationManager;
     private Location location = null;
     private final Long updateTime = 1000L*60*1;
     private final Long minUpdateTime = updateTime / 3;
