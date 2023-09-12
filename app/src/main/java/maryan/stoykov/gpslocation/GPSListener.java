@@ -35,9 +35,9 @@ public class GPSListener implements LocationListener {
     private final Context context;
     private final LocationManager locationManager;
     private Location location = null;
-    private final Long updateTime = 1000L*60*1;
+    private final Long updateTime = 1000L*60*5;
     private final Long minUpdateTime = updateTime / 3;
-    private final float minUpdateDistance = 0f;
+    private final float minUpdateDistance = 3f;
     private Location lastGPSLocation = null;
     private Location lastNetworkLocation = null;
     public Location getLocation(){
