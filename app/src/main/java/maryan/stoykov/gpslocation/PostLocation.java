@@ -8,7 +8,6 @@ public class PostLocation {
     private final String className = this.getClass().getSimpleName();
     private final String endpointURL;
     private HttpURLConnection conn;
-    private int responseCode;
     private final PostLocationResponseListener postLocationResponseListener;
 
     public PostLocation(String endpointURL, PostLocationResponseListener postLocationResponseListener) {
@@ -57,5 +56,4 @@ public class PostLocation {
         });
         thread.start();
     }
-
 }

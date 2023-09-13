@@ -35,9 +35,9 @@ public class GPSListener implements LocationListener {
     private final Context context;
     private final LocationManager locationManager;
     private Location location = null;
-    private final Long updateTime = 1000L*60*5;
-    private final Long minUpdateTime = updateTime / 3;
-    private final float minUpdateDistance = 3f;
+    private Long updateInterval = 1000L*60*5;
+    private Long minUpdateInterval = updateInterval / 3;
+    private float minUpdateDistance = 5f;
     private Location lastGPSLocation = null;
     private Location lastNetworkLocation = null;
     public Location getLocation(){
@@ -63,6 +63,10 @@ public class GPSListener implements LocationListener {
         }
     };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
+
+        updateInterval = LocationParams.getUpdateInterval(context)*1000L;
+        minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
+        minUpdateDistance = LocationParams.getMinUpdateDistance(context);
 
         this.context = context;
 
@@ -103,19 +107,22 @@ public class GPSListener implements LocationListener {
     @SuppressLint("MissingPermission")
     private void startUsingNetworkProvider(){
         locationManager.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER, updateTime, minUpdateDistance, this);
+                LocationManager.NETWORK_PROVIDER, updateInterval, minUpdateDistance, this);
     }
     @SuppressLint("MissingPermission")
     private void startUsingGpsProvider(){
         locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, updateTime, minUpdateDistance, this);
+                LocationManager.GPS_PROVIDER, updateInterval, minUpdateDistance, this);
     }
 
     @SuppressLint("MissingPermission")
     public void startUsingFusedProvider(){
-        LocationRequest locationRequest = new LocationRequest.Builder(updateTime)
+        Log.i(className,"updateInterval "+updateInterval);
+        Log.i(className,"min updateInterval "+minUpdateInterval);
+        Log.i(className,"updateDistance "+minUpdateDistance);
+        LocationRequest locationRequest = new LocationRequest.Builder(updateInterval)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setMinUpdateIntervalMillis(minUpdateTime)
+                .setMinUpdateIntervalMillis(minUpdateInterval)
                 .setMinUpdateDistanceMeters(minUpdateDistance)
                 .setGranularity(Granularity.GRANULARITY_FINE)
                 .build();
