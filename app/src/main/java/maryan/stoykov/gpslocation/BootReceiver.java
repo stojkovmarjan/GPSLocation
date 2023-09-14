@@ -16,14 +16,14 @@ public class BootReceiver extends BroadcastReceiver {
 
         if (intent.getAction() != null) {
             if (intent.getAction().equals(Intent.ACTION_REBOOT)) {
-                serviceIntent.putExtra("SIGNAL","REBOOT");
+                serviceIntent.putExtra("SIGNAL", ServiceSignal.REBOOT);
                 context.startForegroundService(serviceIntent);
             } else if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
-                serviceIntent.putExtra("SIGNAL","POWER OFF or REBOOT");
+                serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_OFF);
                 context.startForegroundService(serviceIntent);
             } else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)
                     && startAtBoot){
-                serviceIntent.putExtra("SIGNAL","SERVICE STARTED ON BOOT");
+                serviceIntent.putExtra("SIGNAL", ServiceSignal.SERVICE_STARTED_ON_BOOT);
                 context.startForegroundService(serviceIntent);
             }
         }

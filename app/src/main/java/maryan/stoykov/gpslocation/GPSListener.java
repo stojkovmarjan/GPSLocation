@@ -64,10 +64,6 @@ public class GPSListener implements LocationListener {
     };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
-        updateInterval = LocationParams.getUpdateInterval(context)*1000L;
-        minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
-        minUpdateDistance = LocationParams.getMinUpdateDistance(context);
-
         this.context = context;
 
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
@@ -75,6 +71,7 @@ public class GPSListener implements LocationListener {
         this.gpsListenerOnChange = gpsListenerOnChange; // event emitter / listener
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+
     }
 
     protected void requestLocation() {
@@ -91,6 +88,10 @@ public class GPSListener implements LocationListener {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
         }
+
+        updateInterval = LocationParams.getUpdateInterval(context)*1000L;
+        minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
+        minUpdateDistance = LocationParams.getMinUpdateDistance(context);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             startUsingFusedProvider();
@@ -117,9 +118,11 @@ public class GPSListener implements LocationListener {
 
     @SuppressLint("MissingPermission")
     public void startUsingFusedProvider(){
+
         Log.i(className,"updateInterval "+updateInterval);
         Log.i(className,"min updateInterval "+minUpdateInterval);
         Log.i(className,"updateDistance "+minUpdateDistance);
+
         LocationRequest locationRequest = new LocationRequest.Builder(updateInterval)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setMinUpdateIntervalMillis(minUpdateInterval)
@@ -195,10 +198,12 @@ public class GPSListener implements LocationListener {
         LocationListener.super.onProviderDisabled(provider);
     }
     public void stopLocationUpdate(){
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             fusedLocationClient.removeLocationUpdates(locationCallback);
         } else {
             locationManager.removeUpdates(this);
         }
+
     }
 }

@@ -43,7 +43,7 @@ public class GPSStickyService extends Service
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
-        serviceSignalMsg = "SERVICE STOPPED BY USER";
+        serviceSignalMsg = ServiceSignal.SERVICE_STOPPED_BY_USER;
 
         onLocationSubmit(gpsListener.getLocation(),serviceSignalMsg);
 
@@ -56,22 +56,29 @@ public class GPSStickyService extends Service
 
     @Override
     public boolean stopService(Intent name) {
+
         return super.stopService(name);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        serviceSignalMsg = "SERVICE STARTED ON BOOT";
+        serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
         // signal received from intent (context.startForegroundService(serviceIntent);)
         if (intent.hasExtra("SIGNAL")){
+
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
-            assert serviceSignalMsg != null;
+
+            //assert serviceSignalMsg != null;
+
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
+
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
+                gpsListener.stopLocationUpdate();
+                gpsListener = null;
             }
         }
 
@@ -85,6 +92,17 @@ public class GPSStickyService extends Service
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
+
+//    private void processSignal(String signal){
+//
+//        if (signal.equals(ServiceSignal.USER_CHANGED_PARAMS)
+//        && gpsListener != null) { // gps listener restart locations update request
+//            Log.d(className,"STOP LOC UPD, gpsListener null");
+//            gpsListener.stopLocationUpdate();
+//            gpsListener = null;
+//        }
+//
+//    }
 
     @Nullable
     @Override

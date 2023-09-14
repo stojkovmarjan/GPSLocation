@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.786" />
+        app:layout_constraintVertical_bias="0.863" />
 
     <TextView
         android:id="@+id/tvDeviceId"
@@ -112,14 +112,23 @@
         android:id="@+id/checkStartAtBoot"
         android:layout_width="207dp"
         android:layout_height="50dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="20dp"
         android:checked="true"
         android:text="Start service on boot"
         android:textAlignment="viewStart"
         android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnApplySettings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnApplySettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="88dp"
+        android:text="Save &amp; Apply Settings"
         app:layout_constraintBottom_toTopOf="@+id/serviceButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
 
 
