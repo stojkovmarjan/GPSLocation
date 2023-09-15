@@ -93,12 +93,12 @@ public class GPSListener implements LocationListener {
         minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
         minUpdateDistance = LocationParams.getMinUpdateDistance(context);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            startUsingFusedProvider();
-        } else {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+//            startUsingFusedProvider();
+//        } else {
             startUsingNetworkProvider();
             startUsingGpsProvider();
-        }
+//        }
 
     }
 
@@ -151,10 +151,11 @@ public class GPSListener implements LocationListener {
         if (this.location != null && chooseBetterLocation().equals(this.location)){
             Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
                     +this.location.getProvider());
-            return;
+            //return;
         } else {
             this.location = chooseBetterLocation();
         }
+
 
         if (this.location == null) this.location = location;
 
