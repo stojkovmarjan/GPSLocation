@@ -96,7 +96,7 @@ public class GPSListener implements LocationListener {
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
 //            startUsingFusedProvider();
 //        } else {
-            startUsingNetworkProvider();
+//            startUsingNetworkProvider();
             startUsingGpsProvider();
 //        }
 
@@ -140,29 +140,29 @@ public class GPSListener implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+//        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+//
+//        if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
+//            lastGPSLocation = location;
+//        } else if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())){
+//            lastNetworkLocation = location;
+//        }
+//
+//        if (this.location != null && chooseBetterLocation().equals(this.location)){
+//            Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
+//                    +this.location.getProvider());
+//            //return;
+//        } else {
+//            this.location = chooseBetterLocation();
+//        }
+//
+//
+//        if (this.location == null) this.location = location;
+//
+//        Log.i("GPSListener:", "GPS onLocationChanged best provider "+" "
+//                +this.location.getProvider());
 
-        if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
-            lastGPSLocation = location;
-        } else if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())){
-            lastNetworkLocation = location;
-        }
-
-        if (this.location != null && chooseBetterLocation().equals(this.location)){
-            Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
-                    +this.location.getProvider());
-            //return;
-        } else {
-            this.location = chooseBetterLocation();
-        }
-
-
-        if (this.location == null) this.location = location;
-
-        Log.i("GPSListener:", "GPS onLocationChanged best provider "+" "
-                +this.location.getProvider());
-
-        gpsListenerOnChange.onLocationSubmit(this.location, "");// emit event to sticky service
+        gpsListenerOnChange.onLocationSubmit(location, "");// emit event to sticky service
     }
 
     // choose between Network and Gps provided locations
