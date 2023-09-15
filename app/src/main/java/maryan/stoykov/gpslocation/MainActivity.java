@@ -132,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private final ActivityResultLauncher<Intent> batteryOptimizationLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> batteryOptimizationLauncher =
+            registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override

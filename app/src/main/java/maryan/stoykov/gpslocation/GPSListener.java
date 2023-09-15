@@ -128,6 +128,7 @@ public class GPSListener implements LocationListener {
                 .setMinUpdateIntervalMillis(minUpdateInterval)
                 .setMinUpdateDistanceMeters(minUpdateDistance)
                 .setGranularity(Granularity.GRANULARITY_FINE)
+                .setMaxUpdateDelayMillis(0)
                 .build();
 
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
