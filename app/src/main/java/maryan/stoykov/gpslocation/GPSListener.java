@@ -140,7 +140,7 @@ public class GPSListener implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        Log.i("GPSListener:", "GPS onLocationChanged event"+" "+location.getProvider());
+        Log.i(className, "GPS onLocationChanged event"+" "+location.getProvider());
 
         if (LocationManager.GPS_PROVIDER.equals(location.getProvider())){
             lastGPSLocation = location;
@@ -149,17 +149,19 @@ public class GPSListener implements LocationListener {
         }
 
         if (this.location != null && chooseBetterLocation().equals(this.location)){
-            Log.i("GPSListener:", "GPS onLocationChanged same as last "+" "
+            Log.i(className, "GPS onLocationChanged same as last "+" "
                     +this.location.getProvider());
+            if ((chooseBetterLocation().getTime() - this.location.getTime())>= updateInterval){
+                this.location = chooseBetterLocation();
+            } else return;
             //return;
         } else {
             this.location = chooseBetterLocation();
         }
 
-
         if (this.location == null) this.location = location;
 
-        Log.i("GPSListener:", "GPS onLocationChanged best provider "+" "
+        Log.i(className, "GPS onLocationChanged best provider "+" "
                 +this.location.getProvider());
 
         gpsListenerOnChange.onLocationSubmit(this.location, "");// emit event to sticky service
@@ -201,11 +203,12 @@ public class GPSListener implements LocationListener {
     }
     public void stopLocationUpdate(){
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-        } else {
-            locationManager.removeUpdates(this);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+//            fusedLocationClient.removeLocationUpdates(locationCallback);
+//        } else {
+//            locationManager.removeUpdates(this);
+//        }
+        locationManager.removeUpdates(this);
 
     }
 }
