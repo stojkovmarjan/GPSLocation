@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -16,6 +17,10 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GPSStickyService extends Service
         implements  GPSListenerOnChange, PostLocationResponseListener {
@@ -24,6 +29,8 @@ public class GPSStickyService extends Service
     private PostLocationResponseListener postLocationResponseListener;
     private String serviceSignalMsg = "";
     private BootReceiver receiver;
+    private ScheduledExecutorService scheduledLocationSender;
+    private LocationDbRecord locationDbRecord;
 
     @Override
     public void onCreate() {
@@ -88,9 +95,58 @@ public class GPSStickyService extends Service
 
         Log.d(className,"START");
 
+        if (serviceSignalMsg.equals(ServiceSignal.SERVICE_STARTED_BY_USER)
+                || serviceSignalMsg.equals(ServiceSignal.SERVICE_STARTED_ON_BOOT)){
+            // TODO: here start the code that sends location data to Post class
+            setScheduledLocationSender();
+        }
+
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
+    }
+
+    private void setScheduledLocationSender(){
+
+        scheduledLocationSender = Executors.newSingleThreadScheduledExecutor();
+
+        scheduledLocationSender.scheduleAtFixedRate(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.i(className, "SCHEDULED LOCATION SENDING");
+                        try {
+                            if (locationDbRecord != null){
+                                if (!serviceSignalMsg.equals("")){
+                                    locationDbRecord.setMessage(addServiceMsg());
+                                }
+                                PostLocation postLocation = new PostLocation(
+                                        "https://pijo.linkpc.net/api/location",
+                                        GPSStickyService.this);
+                                postLocation.sendPost(locationDbRecord);
+                            } else {
+                                Log.i(className, "LOCATION IS NULL, EXITING SCHEDULED LOCATION SENDING");
+                            }
+                        } catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                }, 0,1,TimeUnit.MINUTES
+        );
+    }
+
+    private String addServiceMsg(){
+
+        String returnMsg = serviceSignalMsg;
+
+        if (!locationDbRecord.getMessage().equals("")){
+            returnMsg = serviceSignalMsg+", "+locationDbRecord.getMessage();
+        } else {
+            returnMsg = serviceSignalMsg;
+        }
+        serviceSignalMsg = "";
+
+        return returnMsg;
     }
 
 //    private void processSignal(String signal){
@@ -129,27 +185,27 @@ public class GPSStickyService extends Service
     @Override
     public void onLocationSubmit(Location location, String msg) {
 
-        if (!serviceSignalMsg.equals("")){
-            msg = serviceSignalMsg;
-            serviceSignalMsg = "";
-        }
+//        if (!serviceSignalMsg.equals("")){
+//            msg = serviceSignalMsg;
+//            serviceSignalMsg = "";
+//        }
 
         Log.i(className, "LOCATION CHANGED EVENT");
 
         Log.i(className, location.toString());
 
-        PostLocation postLocation = new PostLocation(
-                "https://pijo.linkpc.net/api/location", this);
+//        PostLocation postLocation = new PostLocation(
+//                "https://pijo.linkpc.net/api/location", this);
 
-        LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
+         locationDbRecord = new LocationDbRecord(this, location, msg);
 
-        postLocation.sendPost(locationDbRecord);
+//        postLocation.sendPost(locationDbRecord);
     }
 
     @Override
     public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
 
-        Log.i(className,"Serever responded with code "+responseCode);
+        Log.i(className,"Server responded with code "+responseCode);
 
         if (responseCode >= 200 && responseCode<300){
             if (locationDbRecord.getId() > -1){

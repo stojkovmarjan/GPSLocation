@@ -125,7 +125,7 @@ public class GPSListener implements LocationListener {
 
         LocationRequest locationRequest = new LocationRequest.Builder(updateInterval)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setMinUpdateIntervalMillis(minUpdateInterval)
+                .setMinUpdateIntervalMillis(minUpdateInterval-3000)
                 .setMinUpdateDistanceMeters(minUpdateDistance)
                 .setGranularity(Granularity.GRANULARITY_FINE)
                 .setMaxUpdateDelayMillis(0)
@@ -134,7 +134,7 @@ public class GPSListener implements LocationListener {
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-    /* listener for GPS and Network provider
+    /* listener for GPS and Network provider is SDK < S
      won't call chooseBetterLocation until both network and gps location are obtained
      */
     @Override

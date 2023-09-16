@@ -52,6 +52,7 @@ public class PostLocation {
                 } finally {
                     conn.disconnect();
                 }
+//                return null;
             }
         });
         thread.start();

@@ -20,7 +20,7 @@ public class LocationDbRecord {
     private final Double latitude;
     private final Double longitude;
     private final Float accuracy;
-    private final String message;
+    private String message;
     private final String deviceId;
     private final String provider;
     private final Long id;
@@ -85,6 +85,9 @@ public class LocationDbRecord {
     }
     public String getMessage(){
         return this.message;
+    }
+    public void setMessage(String msg){
+        this.message = msg;
     }
     public Long getId(){
         return this.id;
