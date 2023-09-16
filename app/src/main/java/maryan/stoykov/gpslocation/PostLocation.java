@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation;
 
+import android.util.Log;
+
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,7 +25,6 @@ public class PostLocation {
             public void run() {
 
                 try {
-
                     java.net.URL url = new URL(endpointURL);
 
                     conn = (HttpURLConnection) url.openConnection();
@@ -50,6 +51,7 @@ public class PostLocation {
                             404, locationDbRecord
                     );
                 } finally {
+                    locationDbRecord.setMessage("");
                     conn.disconnect();
                 }
 //                return null;

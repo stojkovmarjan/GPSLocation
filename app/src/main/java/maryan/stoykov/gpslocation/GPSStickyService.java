@@ -31,6 +31,7 @@ public class GPSStickyService extends Service
     private BootReceiver receiver;
     private ScheduledExecutorService scheduledLocationSender;
     private LocationDbRecord locationDbRecord;
+    private boolean isSendingFirstLocation = true;
 
     @Override
     public void onCreate() {
@@ -77,8 +78,6 @@ public class GPSStickyService extends Service
 
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
-            //assert serviceSignalMsg != null;
-
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
 
             if (gpsListener != null) {
@@ -95,12 +94,6 @@ public class GPSStickyService extends Service
 
         Log.d(className,"START");
 
-        if (serviceSignalMsg.equals(ServiceSignal.SERVICE_STARTED_BY_USER)
-                || serviceSignalMsg.equals(ServiceSignal.SERVICE_STARTED_ON_BOOT)){
-            // TODO: here start the code that sends location data to Post class
-            setScheduledLocationSender();
-        }
-
         startForeground(1001, SetNotification().build(), FOREGROUND_SERVICE_TYPE_LOCATION );
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
@@ -116,50 +109,71 @@ public class GPSStickyService extends Service
                     public void run() {
                         Log.i(className, "SCHEDULED LOCATION SENDING");
                         try {
+                            Log.i(className, "Service msg is "+serviceSignalMsg);
                             if (locationDbRecord != null){
-                                if (!serviceSignalMsg.equals("")){
-                                    locationDbRecord.setMessage(addServiceMsg());
-                                }
+
+                                locationDbRecord.setMessage(serviceSignalMsg);
+
+                                Log.i(className, "Service msg is "+locationDbRecord.getMessage());
+
                                 PostLocation postLocation = new PostLocation(
                                         "https://pijo.linkpc.net/api/location",
                                         GPSStickyService.this);
+
                                 postLocation.sendPost(locationDbRecord);
+
+                                if (isSendingFirstLocation){
+                                    isSendingFirstLocation = false;
+                                }
+
+                               serviceSignalMsg = "";
+
                             } else {
                                 Log.i(className, "LOCATION IS NULL, EXITING SCHEDULED LOCATION SENDING");
                             }
                         } catch (Exception ex){
                             ex.printStackTrace();
                         }
+
                     }
-                }, 0,1,TimeUnit.MINUTES
+                }, 0,LocationParams.getUpdateInterval(
+                        GPSStickyService.this
+                )*1000L,TimeUnit.MILLISECONDS
         );
+
+    }
+
+    @Override
+    public void onLocationSubmit(Location location, String msg) {
+
+        Log.i(className, "LOCATION CHANGED EVENT");
+
+        Log.i(className, location.toString());
+
+        if (!serviceSignalMsg.equals("")) msg=serviceSignalMsg;
+
+        locationDbRecord = new LocationDbRecord(this, location, msg);
+
+        if (isSendingFirstLocation) {
+            setScheduledLocationSender();
+        }
+
     }
 
     private String addServiceMsg(){
 
         String returnMsg = serviceSignalMsg;
 
-        if (!locationDbRecord.getMessage().equals("")){
+        if (!locationDbRecord.getMessage().equals("") && !locationDbRecord.equals(serviceSignalMsg)){
             returnMsg = serviceSignalMsg+", "+locationDbRecord.getMessage();
         } else {
             returnMsg = serviceSignalMsg;
         }
+
         serviceSignalMsg = "";
 
         return returnMsg;
     }
-
-//    private void processSignal(String signal){
-//
-//        if (signal.equals(ServiceSignal.USER_CHANGED_PARAMS)
-//        && gpsListener != null) { // gps listener restart locations update request
-//            Log.d(className,"STOP LOC UPD, gpsListener null");
-//            gpsListener.stopLocationUpdate();
-//            gpsListener = null;
-//        }
-//
-//    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -182,25 +196,6 @@ public class GPSStickyService extends Service
                 .setSmallIcon(R.drawable.ic_launcher_background);
     }
 
-    @Override
-    public void onLocationSubmit(Location location, String msg) {
-
-//        if (!serviceSignalMsg.equals("")){
-//            msg = serviceSignalMsg;
-//            serviceSignalMsg = "";
-//        }
-
-        Log.i(className, "LOCATION CHANGED EVENT");
-
-        Log.i(className, location.toString());
-
-//        PostLocation postLocation = new PostLocation(
-//                "https://pijo.linkpc.net/api/location", this);
-
-         locationDbRecord = new LocationDbRecord(this, location, msg);
-
-//        postLocation.sendPost(locationDbRecord);
-    }
 
     @Override
     public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
@@ -216,6 +211,11 @@ public class GPSStickyService extends Service
         } else {
             Log.e(className,"ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
+        }
+
+        if (gpsListener == null) {
+            scheduledLocationSender.shutdown();
+            scheduledLocationSender = null;
         }
     }
     private void postDbRecords(){
