@@ -6,7 +6,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -17,7 +16,6 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -114,7 +112,7 @@ public class GPSStickyService extends Service
 
                                 locationDbRecord.setMessage(serviceSignalMsg);
 
-                                Log.i(className, "Service msg is "+locationDbRecord.getMessage());
+                                Log.i(className, "Location msg is "+locationDbRecord.getMessage());
 
                                 PostLocation postLocation = new PostLocation(
                                         "https://pijo.linkpc.net/api/location",
@@ -158,21 +156,6 @@ public class GPSStickyService extends Service
             setScheduledLocationSender();
         }
 
-    }
-
-    private String addServiceMsg(){
-
-        String returnMsg = serviceSignalMsg;
-
-        if (!locationDbRecord.getMessage().equals("") && !locationDbRecord.equals(serviceSignalMsg)){
-            returnMsg = serviceSignalMsg+", "+locationDbRecord.getMessage();
-        } else {
-            returnMsg = serviceSignalMsg;
-        }
-
-        serviceSignalMsg = "";
-
-        return returnMsg;
     }
     @Nullable
     @Override
