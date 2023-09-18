@@ -2,6 +2,7 @@ package maryan.stoykov.gpslocation;
 
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -24,12 +26,13 @@ public class GPSStickyService extends Service
         implements  GPSListenerOnChange, PostLocationResponseListener {
     private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
-    private PostLocationResponseListener postLocationResponseListener;
+    //private PostLocationResponseListener postLocationResponseListener;
     private String serviceSignalMsg = "";
     private BootReceiver receiver;
     private ScheduledExecutorService scheduledLocationSender;
     private LocationDbRecord locationDbRecord;
     private boolean isSendingFirstLocation = true;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -44,6 +47,8 @@ public class GPSStickyService extends Service
     public void onDestroy() {
 
         super.onDestroy();
+
+        wakeLock.release();
 
         unregisterReceiver(receiver);
 
@@ -66,8 +71,17 @@ public class GPSStickyService extends Service
         return super.stopService(name);
     }
 
+    @SuppressLint("WakelockTimeout")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, className+":theWakeLock"
+        );
+
+        wakeLock.acquire();
 
         serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
@@ -107,7 +121,12 @@ public class GPSStickyService extends Service
                     public void run() {
                         Log.i(className, "SCHEDULED LOCATION SENDING");
                         try {
-                            Log.i(className, "Service msg is "+serviceSignalMsg);
+                            Log.d(className, "TimeZone: "+DeviceStatus.getTimeZone());
+                            Log.d(className, "TimeZone Offset: "+DeviceStatus.getTimeZoneOffsetInHours());
+                            Log.d(className,
+                                    "Battery status: "+DeviceStatus.getBatteryLevel(
+                                            GPSStickyService.this
+                                    ));
                             if (locationDbRecord != null){
 
                                 locationDbRecord.setMessage(serviceSignalMsg);
@@ -186,6 +205,7 @@ public class GPSStickyService extends Service
         Log.i(className,"Server responded with code "+responseCode);
 
         if (responseCode >= 200 && responseCode<300){
+
             if (locationDbRecord.getId() > -1){
                 deleteDbRecord(locationDbRecord.getId());
             } else {
@@ -200,7 +220,9 @@ public class GPSStickyService extends Service
             scheduledLocationSender.shutdown();
             scheduledLocationSender = null;
         }
+
     }
+
     private void postDbRecords(){
 
         List<LocationDbRecord> locationDbRecords;

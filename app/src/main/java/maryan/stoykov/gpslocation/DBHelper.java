@@ -98,8 +98,7 @@ public class DBHelper extends SQLiteOpenHelper {
                     String message = cursor.getString(cursor.getColumnIndexOrThrow("Message"));
 
                     locationDbRecords.add(new LocationDbRecord(
-                            id, dateTime, deviceId, latitude, longitude,accuracy, provider, message
-                    ));
+                            id, dateTime, deviceId, latitude, longitude,accuracy, provider, message));
 
                 }
 

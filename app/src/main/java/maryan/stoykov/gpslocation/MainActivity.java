@@ -4,7 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -30,6 +32,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,10 +47,12 @@ public class MainActivity extends AppCompatActivity {
     private EditText etMinUpdateDistance;
     private CheckBox checkStartAtBoot;
     final String[] permissions = {
+            Manifest.permission.WAKE_LOCK,
             Manifest.permission.FOREGROUND_SERVICE,
             Manifest.permission.RECEIVE_BOOT_COMPLETED,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE,
             Manifest.permission.INTERNET
     };
 
@@ -94,8 +99,6 @@ public class MainActivity extends AppCompatActivity {
         );
 
         setServiceButtonState(isServiceRunning());
-
-        // ask for IGNORE BATTERY OPTIMIZATION
         askIgnoreBatteryOptimization();
         //askForPermissions();
         toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -114,6 +117,36 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private void askTurnOffPowerSaver() {
+        String packageName = getPackageName();
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+
+        if (powerManager.isPowerSaveMode()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Power Save Mode")
+                    .setMessage(
+                            "Power save mode is on. This may reduce the performance of your app.")
+                    .setPositiveButton("Turn off", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Open the power saving mode settings.
+                            startActivity(new Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Toast.makeText(MainActivity.this,
+                                    "Please restart the application and turn off power saver!",
+                                    Toast.LENGTH_LONG).show();
+                            finish();
+                        }
+                    })
+                    .show();
+        }
+    }
+
+
     private void askIgnoreBatteryOptimization() {
 
         //Intent intent = new Intent();
@@ -128,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             askForPermissions();
         }
-
 
     }
 
@@ -268,6 +300,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_ACCESS_BACKGROUND_LOCATION_CODE) {
             Log.i("ACCESS_BACKGROUND_LOCATION", "ACCESS_BACKGROUND_LOCATION "+String.valueOf(grantResults[0]));
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this,
+                        "Please restart the application and grant all permissions!",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+               askTurnOffPowerSaver();
+            }
         }
     }
 

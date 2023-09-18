@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -48,10 +49,10 @@ public class GPSListener implements LocationListener {
     }
 
     private final GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
-    private final FusedLocationProviderClient fusedLocationClient;
+    private FusedLocationProviderClient fusedLocationClient;
 
     // listeners for FusedLocationProviderClient
-    private final LocationCallback locationCallback  = new LocationCallback() {
+    private LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
             super.onLocationAvailability(locationAvailability);
@@ -131,7 +132,9 @@ public class GPSListener implements LocationListener {
                 .setMaxUpdateDelayMillis(0)
                 .build();
 
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        Looper mainLooper = Looper.getMainLooper();
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper);
     }
 
     /* listener for GPS and Network provider is SDK < S
@@ -198,10 +201,33 @@ public class GPSListener implements LocationListener {
     public void onProviderDisabled(@NonNull String provider) {
         LocationListener.super.onProviderDisabled(provider);
     }
+//    @SuppressLint("MissingPermission")
+//    public void requestImmediateLocationUpdate(){
+//        Thread backgroundThread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Looper.prepare(); // Create a message loop for this thread
+//
+//                locationManager.requestLocationUpdates(
+//                        LocationManager.GPS_PROVIDER,
+//                        1000, 0, GPSListener.this);
+//
+//                Looper.loop(); // Start the message loop
+//            }
+//        });
+//
+//        backgroundThread.start();
+//
+//    }
+//    public void removeImmediateLocationUpdate(){
+//        locationManager.removeUpdates(this);
+//    }
     public void stopLocationUpdate(){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            fusedLocationClient.flushLocations();
             fusedLocationClient.removeLocationUpdates(locationCallback);
+            fusedLocationClient = null;
         } else {
             locationManager.removeUpdates(this);
         }

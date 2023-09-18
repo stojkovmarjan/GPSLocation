@@ -24,13 +24,14 @@ public class LocationDbRecord {
     private final String deviceId;
     private final String provider;
     private final Long id;
+    private Location location = null;
     private static final DecimalFormat df = new DecimalFormat("0.00");
     @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     );
     public LocationDbRecord(Long id, String dateTime, String deviceId, Double latitude, Double longitude,
-                            Float accuracy,  String provider, String message ){
+                            Float accuracy, String provider, String message){
 
         this.id = id;
         this.dateTime = dateTime;
@@ -41,11 +42,21 @@ public class LocationDbRecord {
         this.deviceId = deviceId;
         this.provider = provider;
 
+//        this.location = new Location(provider);
+//        this.location.setAccuracy(accuracy);
+//        this.location.setLatitude(latitude);
+//        this.location.setTime(Long.parseLong(dateTime));
+//        this.location.setAccuracy(accuracy);
+//        this.location.setLongitude(longitude);
+        //this.location.setProvider(provider);
+
     }
     @SuppressLint("HardwareIds")
     public LocationDbRecord(Context context, Location location, String message){
 
         this.deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+
 
         this.id = -1L;
         this.dateTime = locationDateFormat.format(location.getTime());
@@ -54,6 +65,8 @@ public class LocationDbRecord {
         this.accuracy = location.getAccuracy();
         this.provider = location.getProvider();
         this.message = message;
+
+        this.location = new Location(location);
     }
     @NonNull
     public String toString(){
@@ -64,6 +77,11 @@ public class LocationDbRecord {
                 this.longitude+", "+
                 this.accuracy+", "
                 +this.message;
+    }
+    public Long getLocationAgeInMilliseconds(){
+        long currentTimeMillis = System.currentTimeMillis();
+        long locationTime = location.getTime();
+        return currentTimeMillis - locationTime;
     }
     public String getDateTime(){
         return this.dateTime;
@@ -86,12 +104,13 @@ public class LocationDbRecord {
     public String getMessage(){
         return this.message;
     }
-    public void setMessage(String msg){
-        this.message = msg;
-    }
     public Long getId(){
         return this.id;
     }
+    public void setMessage(String msg){
+        this.message = msg;
+    }
+
     public JSONObject getLocationJson(){
 
         JSONObject jsonParam = new JSONObject();
