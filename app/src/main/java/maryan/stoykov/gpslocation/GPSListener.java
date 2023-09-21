@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -27,9 +26,12 @@ import com.google.android.gms.location.Priority;
 
 import java.util.List;
 
+import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
+
 /**
  * provides the main service with location data
- * taken from the FUSED LOCATION provider
+ * taken from the FUSED LOCATION provider for android >=11
+ * and from network or gps for android 10
  */
 public class GPSListener implements LocationListener {
     private final String className = this.getClass().getSimpleName();
@@ -52,7 +54,7 @@ public class GPSListener implements LocationListener {
     private FusedLocationProviderClient fusedLocationClient;
 
     // listeners for FusedLocationProviderClient
-    private LocationCallback locationCallback = new LocationCallback() {
+    private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
             super.onLocationAvailability(locationAvailability);
@@ -79,7 +81,8 @@ public class GPSListener implements LocationListener {
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                && ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -132,9 +135,7 @@ public class GPSListener implements LocationListener {
                 .setMaxUpdateDelayMillis(0)
                 .build();
 
-        Looper mainLooper = Looper.getMainLooper();
-
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper);
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
     /* listener for GPS and Network provider is SDK < S
@@ -201,27 +202,6 @@ public class GPSListener implements LocationListener {
     public void onProviderDisabled(@NonNull String provider) {
         LocationListener.super.onProviderDisabled(provider);
     }
-//    @SuppressLint("MissingPermission")
-//    public void requestImmediateLocationUpdate(){
-//        Thread backgroundThread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Looper.prepare(); // Create a message loop for this thread
-//
-//                locationManager.requestLocationUpdates(
-//                        LocationManager.GPS_PROVIDER,
-//                        1000, 0, GPSListener.this);
-//
-//                Looper.loop(); // Start the message loop
-//            }
-//        });
-//
-//        backgroundThread.start();
-//
-//    }
-//    public void removeImmediateLocationUpdate(){
-//        locationManager.removeUpdates(this);
-//    }
     public void stopLocationUpdate(){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
@@ -231,6 +211,5 @@ public class GPSListener implements LocationListener {
         } else {
             locationManager.removeUpdates(this);
         }
-
     }
 }

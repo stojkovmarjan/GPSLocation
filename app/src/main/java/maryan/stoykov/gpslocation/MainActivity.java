@@ -5,12 +5,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -30,11 +32,16 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.Arrays;
+import java.util.List;
+
+@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
     private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
@@ -46,21 +53,20 @@ public class MainActivity extends AppCompatActivity {
     private EditText etMinUpdateInterval;
     private EditText etMinUpdateDistance;
     private CheckBox checkStartAtBoot;
-    final String[] permissions = {
-            Manifest.permission.WAKE_LOCK,
-            Manifest.permission.FOREGROUND_SERVICE,
-            Manifest.permission.RECEIVE_BOOT_COMPLETED,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_NETWORK_STATE,
-            Manifest.permission.INTERNET
-    };
+    private String[] permissions;
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(className,"On create");
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissions = getPermissionsForSDK33plus();
+        } else {
+            permissions = getPermissions();
+        }
 
         etUpdateInterval = findViewById(R.id.etUpdateInterval);
         etMinUpdateInterval = findViewById(R.id.etMinUpdateInterval);
@@ -90,15 +96,12 @@ public class MainActivity extends AppCompatActivity {
                 Float.toString(LocationParams.getMinUpdateDistance(this))
         );
 
-//        checkStartAtBoot.setActivated(
-//                LocationParams.startServiceOnBoot(this)
-//        );
-
         checkStartAtBoot.setChecked(
                 LocationParams.startServiceOnBoot(this)
         );
 
-        setServiceButtonState(isServiceRunning());
+        setServiceButtonState( isServiceRunning() );
+
         askIgnoreBatteryOptimization();
         //askForPermissions();
         toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -110,15 +113,44 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     stopGPSService();
                 }
+
                 setServiceButtonState(b);
+
             }
         });
     }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
+//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        boolean notificationsEnabled = notificationManager.areNotificationsEnabled();
+
+        setServiceButtonState( isServiceRunning() );
+
+        Log.d(className,"ON RESUME");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
     private void askTurnOffPowerSaver() {
+
         String packageName = getPackageName();
+
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
         if (powerManager.isPowerSaveMode()) {
@@ -145,8 +177,6 @@ public class MainActivity extends AppCompatActivity {
                     .show();
         }
     }
-
-
     private void askIgnoreBatteryOptimization() {
 
         //Intent intent = new Intent();
@@ -161,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             askForPermissions();
         }
-
     }
 
     private final ActivityResultLauncher<Intent> batteryOptimizationLauncher =
@@ -184,13 +213,17 @@ public class MainActivity extends AppCompatActivity {
     );
 
     private void setServiceButtonState(boolean b) {
+
         if (b) {
+            toggleServiceButton.setChecked(true);
             toggleServiceButton.setText("Service is ON");
             toggleServiceButton.setTextColor(Color.GREEN);
         } else {
             toggleServiceButton.setText("Service is OFF");
             toggleServiceButton.setTextColor(Color.GRAY);
+            toggleServiceButton.setChecked(false);
         }
+
     }
 
     private void stopGPSService() {
@@ -299,7 +332,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_ACCESS_BACKGROUND_LOCATION_CODE) {
-            Log.i("ACCESS_BACKGROUND_LOCATION", "ACCESS_BACKGROUND_LOCATION "+String.valueOf(grantResults[0]));
+            Log.i("ACCESS_BACKGROUND_LOCATION",
+                    "ACCESS_BACKGROUND_LOCATION "+String.valueOf(grantResults[0]));
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this,
                         "Please restart the application and grant all permissions!",
@@ -324,5 +358,30 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private String[] getPermissionsForSDK33plus (){
+        return new String[]{
+               Manifest.permission.WAKE_LOCK,
+               Manifest.permission.POST_NOTIFICATIONS,
+               Manifest.permission.FOREGROUND_SERVICE,
+               Manifest.permission.RECEIVE_BOOT_COMPLETED,
+               Manifest.permission.ACCESS_FINE_LOCATION,
+               Manifest.permission.ACCESS_COARSE_LOCATION,
+               Manifest.permission.ACCESS_NETWORK_STATE,
+               Manifest.permission.INTERNET
+       };
+    }
+
+    private String[] getPermissions (){
+        return new String[]{
+                Manifest.permission.WAKE_LOCK,
+                Manifest.permission.FOREGROUND_SERVICE,
+                Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.INTERNET
+        };
     }
 }

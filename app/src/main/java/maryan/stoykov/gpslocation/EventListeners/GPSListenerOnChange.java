@@ -1,4 +1,4 @@
-package maryan.stoykov.gpslocation;
+package maryan.stoykov.gpslocation.EventListeners;
 
 import android.location.Location;
 

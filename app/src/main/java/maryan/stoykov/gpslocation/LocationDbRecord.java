@@ -30,6 +30,7 @@ public class LocationDbRecord {
     private static final SimpleDateFormat locationDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
     );
+    // constructor for dbhelper
     public LocationDbRecord(Long id, String dateTime, String deviceId, Double latitude, Double longitude,
                             Float accuracy, String provider, String message){
 
@@ -42,21 +43,13 @@ public class LocationDbRecord {
         this.deviceId = deviceId;
         this.provider = provider;
 
-//        this.location = new Location(provider);
-//        this.location.setAccuracy(accuracy);
-//        this.location.setLatitude(latitude);
-//        this.location.setTime(Long.parseLong(dateTime));
-//        this.location.setAccuracy(accuracy);
-//        this.location.setLongitude(longitude);
-        //this.location.setProvider(provider);
-
     }
+
+    // constructor for location change event
     @SuppressLint("HardwareIds")
     public LocationDbRecord(Context context, Location location, String message){
 
         this.deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-
 
         this.id = -1L;
         this.dateTime = locationDateFormat.format(location.getTime());
@@ -65,7 +58,6 @@ public class LocationDbRecord {
         this.accuracy = location.getAccuracy();
         this.provider = location.getProvider();
         this.message = message;
-
         this.location = new Location(location);
     }
     @NonNull

@@ -7,4 +7,5 @@ public class ServiceSignal {
     public static final String POWER_OFF = "POWER OFF or REBOOT";
     public static final String REBOOT = "REBOOT";
     public static final String USER_CHANGED_PARAMS = "PARAMS CHANGED";
+    public static final String POWER_SAVER_IS_ON = "POWER SAVER IS ON";
 }

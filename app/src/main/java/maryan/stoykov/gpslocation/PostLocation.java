@@ -1,10 +1,10 @@
 package maryan.stoykov.gpslocation;
 
-import android.util.Log;
-
 import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 
 public class PostLocation {
     private final String className = this.getClass().getSimpleName();
@@ -51,7 +51,6 @@ public class PostLocation {
                             404, locationDbRecord
                     );
                 } finally {
-                    locationDbRecord.setMessage("");
                     conn.disconnect();
                 }
 //                return null;

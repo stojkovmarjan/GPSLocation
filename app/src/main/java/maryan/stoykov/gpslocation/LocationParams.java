@@ -31,14 +31,14 @@ public class LocationParams {
     public static Long getUpdateInterval(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 "location_preferences", Context.MODE_PRIVATE);
-        UPDATE_INTERVAL = sharedPreferences.getLong("updateInterval", 300L);
+        UPDATE_INTERVAL = sharedPreferences.getLong("updateInterval", 60L);
         return UPDATE_INTERVAL;
     }
     public static Long getMinUpdateInterval(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 "location_preferences", Context.MODE_PRIVATE);
 
-        MIN_UPDATE_INTERVAL = sharedPreferences.getLong("minUpdateInterval", 100L);
+        MIN_UPDATE_INTERVAL = sharedPreferences.getLong("minUpdateInterval", 55L);
 
         return MIN_UPDATE_INTERVAL;
     }
@@ -46,7 +46,7 @@ public class LocationParams {
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 "location_preferences", Context.MODE_PRIVATE);
 
-        MIN_UPDATE_DISTANCE = sharedPreferences.getFloat("minUpdateDistance", 5f);
+        MIN_UPDATE_DISTANCE = sharedPreferences.getFloat("minUpdateDistance", 0f);
 
         return MIN_UPDATE_DISTANCE;
     }
