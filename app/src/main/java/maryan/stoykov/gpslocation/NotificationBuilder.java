@@ -24,7 +24,7 @@ public class NotificationBuilder {
                     "maryan.stoykov.gpslocation.MainActivity");
         }
 
-        intent.putExtra("notificationId",POWER_SAVE_NOTIFICATION_ID);
+        intent.putExtra("notificationId",SERVICE_NOTIFICATION_ID);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -76,6 +76,5 @@ public class NotificationBuilder {
         notificationManager.createNotificationChannel(notificationChannel);
 
         notificationManager.notify(POWER_SAVE_NOTIFICATION_ID, builder.build());
-
     }
 }

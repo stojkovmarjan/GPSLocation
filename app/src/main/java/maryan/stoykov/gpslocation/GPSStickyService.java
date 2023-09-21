@@ -37,7 +37,6 @@ public class GPSStickyService extends Service
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
     private final BatteryChangedReceiver batteryChangedReceiver = new BatteryChangedReceiver();
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -225,5 +224,4 @@ public class GPSStickyService extends Service
             Log.e(className,"Deleting a record failed!");
         }
     }
-
 }
