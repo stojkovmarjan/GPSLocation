@@ -41,7 +41,7 @@ import androidx.core.content.ContextCompat;
 import java.util.Arrays;
 import java.util.List;
 
-@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+//@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
     private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
@@ -269,7 +269,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Check if all permissions are granted
         for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat
+                    .checkSelfPermission(
+                    this, permission) != PackageManager.PERMISSION_GRANTED
+            ) {
                 return false;
             }
         }
@@ -360,6 +363,8 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+
+    @SuppressLint("InlinedApi")
     private String[] getPermissionsForSDK33plus (){
         return new String[]{
                Manifest.permission.WAKE_LOCK,

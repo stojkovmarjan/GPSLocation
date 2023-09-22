@@ -24,9 +24,9 @@ public class LocationDbRecord {
     private final String deviceId;
     private final String provider;
     private final Long id;
-    private int batteryLevel;
-    private int tZoneOffset;
-    private String timeZone;
+    private final int batteryLevel;
+    private final int tZoneOffset;
+    private final String timeZone;
     private DeviceStatusDbRecord deviceStatusDbRecord;
     private Location location = null;
     private static final DecimalFormat df = new DecimalFormat("0.00");

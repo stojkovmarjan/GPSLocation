@@ -16,7 +16,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private final String className = this.getClass().getSimpleName();
     private static final String DATABASE_NAME = "tracking.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String LOCATIONS_TABLE = "Locations";
     private static final String CREATE_TABLE_LOCATIONS = "CREATE TABLE Locations (" +
             "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -25,9 +25,9 @@ public class DBHelper extends SQLiteOpenHelper {
             "Latitude REAL NOT NULL," +
             "Longitude REAL NOT NULL," +
             "Accuracy REAL NOT NULL," +
-            "BatteryLevel INTEGER," +
-            "TimeZoneOffset INTEGER,"+
-            "TimeZone TEXT,"+
+            "BatteryLevel INTEGER NOT NULL," +
+            "TimeZoneOffset INTEGER NOT NULL,"+
+            "TimeZone TEXT NOT NULL,"+
             "Provider TEXT NOT NULL,"+
             "Message TEXT)";
     public DBHelper(@Nullable Context context) {
@@ -36,6 +36,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d(className,"CREATING TABLE");
         db.execSQL(CREATE_TABLE_LOCATIONS);
     }
 
