@@ -83,7 +83,11 @@ public class LocationDbRecord {
                 this.longitude+", "+
                 this.longitude+", "+
                 this.longitude+", "+
-                this.accuracy+", "
+                this.accuracy+", "+
+                this.batteryLevel+", "+
+                this.tZoneOffset+", "+
+                this.timeZone+", "+
+                this.provider+", "
                 +this.message;
     }
     public Long getLocationAgeInMilliseconds(){
@@ -139,6 +143,9 @@ public class LocationDbRecord {
             jsonParam.put("latitude", this.latitude);
             jsonParam.put("longitude", this.longitude);
             jsonParam.put("accuracy", df.format(this.accuracy));
+            jsonParam.put("batteryLevel", this.getBatteryLevel());
+            jsonParam.put("timeZone", this.getTimeZone());
+            jsonParam.put("tZoneOffset", this.getTZoneOffset());
             jsonParam.put("provider",this.provider);
             jsonParam.put("message",this.message);
 
