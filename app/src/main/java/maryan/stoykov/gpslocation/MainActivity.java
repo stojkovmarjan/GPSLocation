@@ -61,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(className,"On create");
-
+        try (DBHelper db = new DBHelper(this)) {
+            Log.d(className,"CALLED DB");
+        }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permissions = getPermissionsForSDK33plus();
         } else {

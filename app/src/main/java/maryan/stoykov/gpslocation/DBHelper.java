@@ -16,7 +16,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private final String className = this.getClass().getSimpleName();
     private static final String DATABASE_NAME = "tracking.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static final String LOCATIONS_TABLE = "Locations";
     private static final String CREATE_TABLE_LOCATIONS = "CREATE TABLE Locations (" +
             "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
