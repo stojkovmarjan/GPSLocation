@@ -25,6 +25,9 @@ public class DBHelper extends SQLiteOpenHelper {
             "Latitude REAL NOT NULL," +
             "Longitude REAL NOT NULL," +
             "Accuracy REAL NOT NULL," +
+            "BatteryLevel INTEGER," +
+            "TimeZoneOffset INTEGER,"+
+            "TimeZone TEXT,"+
             "Provider TEXT NOT NULL,"+
             "Message TEXT)";
     public DBHelper(@Nullable Context context) {
@@ -58,6 +61,9 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put("Longitude",locationDbRecord.getLongitude());
         values.put("Latitude",locationDbRecord.getLatitude());
         values.put("Accuracy",locationDbRecord.getAccuracy());
+        values.put("BatteryLevel",locationDbRecord.getBatteryLevel());
+        values.put("TimeZoneOffset", locationDbRecord.getTZoneOffset());
+        values.put("TimeZone", locationDbRecord.getTimeZone());
         values.put("Provider",locationDbRecord.getProvider());
         values.put("Message",locationDbRecord.getMessage()+dbMessage);
 
@@ -94,11 +100,19 @@ public class DBHelper extends SQLiteOpenHelper {
                     Double latitude = cursor.getDouble(cursor.getColumnIndexOrThrow("Latitude"));
                     Double longitude = cursor.getDouble(cursor.getColumnIndexOrThrow("Longitude"));
                     Float accuracy = cursor.getFloat(cursor.getColumnIndexOrThrow("Accuracy"));
+                    int batteryLevel = cursor.getInt(
+                            cursor.getColumnIndexOrThrow("BatteryLevel")
+                    );
+                    int tZoneOffset = cursor.getInt(
+                            cursor.getColumnIndexOrThrow("TimeZoneOffset")
+                    );
+                    String timeZone = cursor.getString(cursor.getColumnIndexOrThrow("TimeZone"));
                     String provider = cursor.getString(cursor.getColumnIndexOrThrow("Provider"));
                     String message = cursor.getString(cursor.getColumnIndexOrThrow("Message"));
 
                     locationDbRecords.add(new LocationDbRecord(
-                            id, dateTime, deviceId, latitude, longitude,accuracy, provider, message));
+                            id, dateTime, deviceId, latitude, longitude,accuracy, batteryLevel,
+                            tZoneOffset, timeZone, provider, message));
 
                 }
 

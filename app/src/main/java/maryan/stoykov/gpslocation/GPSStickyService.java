@@ -137,14 +137,15 @@ public class GPSStickyService extends Service
             }
             serviceSignalMsg = "";
         }
-// -------Data to be added to locationDbRecord / new fields in dbHelper ---
-        Log.d(className, "TimeZone: " + DeviceStatus.getTimeZone());
-        Log.d(className, "TimeZone Offset: " + DeviceStatus.getTimeZoneOffsetInHours());
-        Log.d(className, "Battery status: " + DeviceStatus.getBatteryLevel(
-                GPSStickyService.this
-        ));
-//---------------------------------------------------------------------------------------------
-        LocationDbRecord locationDbRecord = new LocationDbRecord(this, location, msg);
+
+        DeviceStatusDbRecord deviceStatusDbRecord = new DeviceStatusDbRecord(
+                DeviceStatus.getBatteryLevel(GPSStickyService.this),
+                DeviceStatus.getTimeZoneOffsetInHours(),
+                DeviceStatus.getTimeZone()
+        );
+
+        LocationDbRecord locationDbRecord = new LocationDbRecord(
+                this, location, deviceStatusDbRecord, msg);
 
         PostLocation postLocation = new PostLocation(
                 "https://pijo.linkpc.net/api/location",
@@ -188,6 +189,7 @@ public class GPSStickyService extends Service
             Log.i(className, "DB has records");
 
             locationDbRecords = dbHelper.getLocationsList();
+
         }
 
         for (LocationDbRecord locationDbRecord: locationDbRecords ) {
@@ -214,8 +216,11 @@ public class GPSStickyService extends Service
     }
 
     private void deleteDbRecord(Long id){
+
         Log.i(className,"Deleting a record!");
+
         int rowsDeleted = -1;
+
         try (DBHelper dbHelper = new DBHelper(this)) {
             rowsDeleted = dbHelper.deleteLocationRecord(id);
         }

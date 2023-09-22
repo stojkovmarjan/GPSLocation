@@ -64,7 +64,7 @@ public class NotificationBuilder {
                 .createNotificationChannel(notificationChannel);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder (context, CHANNEL_ID)
-                .setContentText("Seems like the battery power saver is on. Please click on this notification to turn off the power saver")
+                .setContentText("Seems like the battery power saver is on.\nPlease click on this notification to turn off the power saver")
                 .setContentTitle("PLEASE TURN OFF POWER SAVER!")
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)

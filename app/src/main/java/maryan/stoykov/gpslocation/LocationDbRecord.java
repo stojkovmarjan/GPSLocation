@@ -24,6 +24,10 @@ public class LocationDbRecord {
     private final String deviceId;
     private final String provider;
     private final Long id;
+    private int batteryLevel;
+    private int tZoneOffset;
+    private String timeZone;
+    private DeviceStatusDbRecord deviceStatusDbRecord;
     private Location location = null;
     private static final DecimalFormat df = new DecimalFormat("0.00");
     @SuppressLint("SimpleDateFormat")
@@ -32,7 +36,12 @@ public class LocationDbRecord {
     );
     // constructor for dbhelper
     public LocationDbRecord(Long id, String dateTime, String deviceId, Double latitude, Double longitude,
-                            Float accuracy, String provider, String message){
+                            Float accuracy,
+                            int batteryLevel,
+                            int tZoneOffset,
+                            String timeZone,
+                            String provider,
+                            String message){
 
         this.id = id;
         this.dateTime = dateTime;
@@ -42,12 +51,16 @@ public class LocationDbRecord {
         this.message = message;
         this.deviceId = deviceId;
         this.provider = provider;
+        this.batteryLevel = batteryLevel;
+        this.timeZone = timeZone;
+        this.tZoneOffset = tZoneOffset;
 
     }
 
     // constructor for location change event
     @SuppressLint("HardwareIds")
-    public LocationDbRecord(Context context, Location location, String message){
+    public LocationDbRecord(Context context, Location location,
+                            DeviceStatusDbRecord deviceStatusDbRecord, String message){
 
         this.deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -58,6 +71,9 @@ public class LocationDbRecord {
         this.accuracy = location.getAccuracy();
         this.provider = location.getProvider();
         this.message = message;
+        this.batteryLevel = deviceStatusDbRecord.getBatteryLevel();
+        this.timeZone = deviceStatusDbRecord.getTimeZone();
+        this.tZoneOffset = deviceStatusDbRecord.getTZoneOffset();
         this.location = new Location(location);
     }
     @NonNull
@@ -98,6 +114,15 @@ public class LocationDbRecord {
     }
     public Long getId(){
         return this.id;
+    }
+    public int getBatteryLevel(){
+        return this.batteryLevel;
+    }
+    public int getTZoneOffset(){
+        return this.tZoneOffset;
+    }
+    public String getTimeZone(){
+        return  this.timeZone;
     }
     public void setMessage(String msg){
         this.message = msg;
