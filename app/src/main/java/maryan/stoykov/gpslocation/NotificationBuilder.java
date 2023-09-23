@@ -11,8 +11,8 @@ import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
 
 public class NotificationBuilder {
-    protected static final int SERVICE_NOTIFICATION_ID = 11001;
-    protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
+    public static final int SERVICE_NOTIFICATION_ID = 11001;
+    public static final int POWER_SAVE_NOTIFICATION_ID = 11002;
     protected static Notification.Builder SetNotification (Context context) {
 
         Intent intent = null;
@@ -67,7 +67,7 @@ public class NotificationBuilder {
                 .setContentText("Seems like the battery power saver is on.\nPlease click on this notification to turn off the power saver")
                 .setContentTitle("PLEASE TURN OFF POWER SAVER!")
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
+//                .setAutoCancel(true)
                 .setSmallIcon(R.drawable.marker_24_1);
 
         NotificationManager notificationManager = (NotificationManager)
@@ -76,5 +76,11 @@ public class NotificationBuilder {
         notificationManager.createNotificationChannel(notificationChannel);
 
         notificationManager.notify(POWER_SAVE_NOTIFICATION_ID, builder.build());
+    }
+
+    public static void cancelNotification(Context context, int notificationId){
+        NotificationManager notificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(notificationId);
     }
 }

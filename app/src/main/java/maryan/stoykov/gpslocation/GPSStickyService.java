@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
+import maryan.stoykov.gpslocation.BroadcastReceivers.PowerSaverReceiver;
 import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 
@@ -35,7 +36,8 @@ public class GPSStickyService extends Service
     private PowerManager.WakeLock wakeLock;
     protected static final int SERVICE_NOTIFICATION_ID = 11001;
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
-    private final BatteryChangedReceiver batteryChangedReceiver = new BatteryChangedReceiver();
+    //private final BatteryChangedReceiver batteryChangedReceiver = new BatteryChangedReceiver();
+    private final PowerSaverReceiver powerSaverReceiver = new PowerSaverReceiver();
 
     @SuppressLint("WakelockTimeout")
     @Override
@@ -45,7 +47,8 @@ public class GPSStickyService extends Service
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
         filter.addAction(Intent.ACTION_SHUTDOWN);
         registerReceiver(bootReceiver, filter);
-        registerReceiver(batteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        //registerReceiver(batteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        registerReceiver(powerSaverReceiver, new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
         wakeLock = powerManager.newWakeLock(
@@ -66,7 +69,9 @@ public class GPSStickyService extends Service
 
         unregisterReceiver(bootReceiver);
 
-        unregisterReceiver(batteryChangedReceiver);
+        //unregisterReceiver(batteryChangedReceiver);
+
+        unregisterReceiver(powerSaverReceiver);
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
