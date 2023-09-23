@@ -37,6 +37,7 @@ public class GPSStickyService extends Service
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
     private final BatteryChangedReceiver batteryChangedReceiver = new BatteryChangedReceiver();
 
+    @SuppressLint("WakelockTimeout")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -45,6 +46,13 @@ public class GPSStickyService extends Service
         filter.addAction(Intent.ACTION_SHUTDOWN);
         registerReceiver(bootReceiver, filter);
         registerReceiver(batteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, className+": theWakeLock"
+        );
+
+        wakeLock.acquire();
     }
 
     @Override
@@ -52,7 +60,9 @@ public class GPSStickyService extends Service
 
         super.onDestroy();
 
-        wakeLock.release();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
 
         unregisterReceiver(bootReceiver);
 
@@ -83,14 +93,6 @@ public class GPSStickyService extends Service
     @SuppressLint("WakelockTimeout")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-
-        wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, className+":theWakeLock"
-        );
-
-        wakeLock.acquire();
 
         serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
