@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat;
 public class NotificationBuilder {
     public static final int SERVICE_NOTIFICATION_ID = 11001;
     public static final int POWER_SAVE_NOTIFICATION_ID = 11002;
+    public static final int IDLE_DUMMY_NOTIFICATION = 11003;
     protected static Notification.Builder SetNotification (Context context) {
 
         Intent intent = null;
@@ -64,7 +65,8 @@ public class NotificationBuilder {
                 .createNotificationChannel(notificationChannel);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder (context, CHANNEL_ID)
-                .setContentText("Seems like the battery power saver is on.\nPlease click on this notification to turn off the power saver")
+                .setContentText(
+                        "Seems like the battery power saver is on.\nPlease click on this notification \nto turn off the power saver")
                 .setContentTitle("PLEASE TURN OFF POWER SAVER!")
                 .setContentIntent(pendingIntent)
 //                .setAutoCancel(true)
@@ -83,4 +85,36 @@ public class NotificationBuilder {
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
     }
+    public static void notifyForDeviceIdle (Context context) {
+
+        Intent intent = new Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,
+                0, intent, PendingIntent.FLAG_IMMUTABLE);
+        final String CHANNEL_ID = "Power saver ID";
+
+        NotificationChannel notificationChannel = new NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_ID,
+                NotificationManager.IMPORTANCE_HIGH
+        );
+
+        context.getSystemService(NotificationManager.class)
+                .createNotificationChannel(notificationChannel);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder (context, CHANNEL_ID)
+                .setContentText("Just a test notification")
+                .setContentTitle("IDLE PROBLEM SOLVING")
+                .setContentIntent(pendingIntent)
+//                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.marker_24_1);
+
+        NotificationManager notificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.createNotificationChannel(notificationChannel);
+
+        notificationManager.notify(IDLE_DUMMY_NOTIFICATION, builder.build());
+    }
+
+
 }

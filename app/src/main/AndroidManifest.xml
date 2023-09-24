@@ -70,6 +70,9 @@
                 <action android:name="android.intent.action.BATTERY_CHANGED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".BroadcastReceivers.DeepSleepAlarmReceiver"
+            android:enabled="true" />
         <service
             android:name=".GPSStickyService"
             android:foregroundServiceType="location" />

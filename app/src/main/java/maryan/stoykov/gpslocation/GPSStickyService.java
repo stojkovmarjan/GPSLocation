@@ -130,14 +130,14 @@ public class GPSStickyService extends Service
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-//                gpsListener.stopLocationUpdate();
-//                gpsListener = null;
+                gpsListener.stopLocationUpdate();
+                gpsListener = null;
             }
         }
 
-//        gpsListener = new GPSListener(this, this);
-//
-//        gpsListener.requestLocation();
+        gpsListener = new GPSListener(this, this);
+
+        gpsListener.requestLocation();
 
         Log.d(className,"START");
 
