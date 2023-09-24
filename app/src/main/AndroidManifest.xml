@@ -46,6 +46,30 @@
                 <action android:name="android.intent.action.REBOOT" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".BroadcastReceivers.PowerSaverReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".BroadcastReceivers.DeepSleepReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".BroadcastReceivers.BatteryChangedReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+            </intent-filter>
+        </receiver>
         <service
             android:name=".GPSStickyService"
             android:foregroundServiceType="location" />

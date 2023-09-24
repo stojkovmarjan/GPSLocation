@@ -13,6 +13,7 @@ import android.location.Location;
 import android.os.BatteryManager;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -23,6 +24,7 @@ import java.util.Objects;
 
 import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
+import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.PowerSaverReceiver;
 import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
@@ -33,26 +35,39 @@ public class GPSStickyService extends Service
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";
     private BootReceiver bootReceiver;
+    private DeepSleepReceiver deepSleepReceiver;
     private PowerManager.WakeLock wakeLock;
     protected static final int SERVICE_NOTIFICATION_ID = 11001;
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
-    //private final BatteryChangedReceiver batteryChangedReceiver = new BatteryChangedReceiver();
-    private final PowerSaverReceiver powerSaverReceiver = new PowerSaverReceiver();
+    private BatteryChangedReceiver batteryChangedReceiver;
+    private PowerSaverReceiver powerSaverReceiver;
 
     @SuppressLint("WakelockTimeout")
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(className,"SERVICE ON CREATE");
         bootReceiver = new BootReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
         filter.addAction(Intent.ACTION_SHUTDOWN);
         registerReceiver(bootReceiver, filter);
-        //registerReceiver(batteryChangedReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        registerReceiver(powerSaverReceiver, new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+
+        powerSaverReceiver = new PowerSaverReceiver();
+        registerReceiver(powerSaverReceiver, new IntentFilter(
+                PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+
+        deepSleepReceiver = new DeepSleepReceiver();
+        registerReceiver(deepSleepReceiver, new
+                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
+
+        batteryChangedReceiver = new BatteryChangedReceiver();
+        registerReceiver(batteryChangedReceiver, new
+                IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
         wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, className+": theWakeLock"
+                PowerManager.PARTIAL_WAKE_LOCK, className+":WakeLock"
         );
 
         wakeLock.acquire();
@@ -62,16 +77,18 @@ public class GPSStickyService extends Service
     public void onDestroy() {
 
         super.onDestroy();
-
+        Log.d(className,"SERVICE ON DESTROY");
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
 
         unregisterReceiver(bootReceiver);
 
-        //unregisterReceiver(batteryChangedReceiver);
+        unregisterReceiver(deepSleepReceiver);
 
         unregisterReceiver(powerSaverReceiver);
+
+        unregisterReceiver(batteryChangedReceiver);
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
@@ -131,6 +148,13 @@ public class GPSStickyService extends Service
 
     @Override
     public void onLocationSubmit(Location location, String msg) {
+
+        PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
+
+        if (isDeviceIdle){
+            msg=msg+" "+isDeviceIdle;
+        }
 
         Log.i(className, "LOCATION CHANGED EVENT");
 

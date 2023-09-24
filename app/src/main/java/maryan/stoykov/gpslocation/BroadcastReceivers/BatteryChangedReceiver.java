@@ -3,6 +3,7 @@ package maryan.stoykov.gpslocation.BroadcastReceivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.Log;
 
 import maryan.stoykov.gpslocation.DeviceStatus;
@@ -14,16 +15,17 @@ public class BatteryChangedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Intent serviceIntent = new Intent(context, GPSStickyService.class);
+        //Intent serviceIntent = new Intent(context, GPSStickyService.class);
 
         Log.d("BatteryChangedReceiver", "BATTERY CHANGED");
 
-        if (DeviceStatus.isPowerSaveOn(context)){
-            NotificationBuilder.notifyForPowerSaver(context);
-            serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_SAVER_IS_ON);
-            context.startForegroundService(serviceIntent);
-
-        }
+        Intent serviceIntent = new Intent(context, GPSStickyService.class);
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+//        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
+//        if (isDeviceIdle){
+//            serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP+" batt changed");
+//            context.startForegroundService(serviceIntent);
+//        }
 
     }
 }
