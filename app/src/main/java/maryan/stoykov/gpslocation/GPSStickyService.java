@@ -1,27 +1,36 @@
 package maryan.stoykov.gpslocation;
 
+import static android.content.Context.INPUT_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.view.KeyEvent.*;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PixelFormat;
 import android.location.Location;
-import android.os.BatteryManager;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.Log;
+import android.app.AlarmManager;
+import android.view.InputQueue;
+import android.view.KeyEvent;
+import android.hardware.input.InputManager;
+import android.view.View;
+import android.view.WindowManager;
+
 
 import androidx.annotation.Nullable;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import maryan.stoykov.gpslocation.BroadcastReceivers.AlarmReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
@@ -32,6 +41,8 @@ import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener {
     private final String className = this.getClass().getSimpleName();
+    private WindowManager windowManager;
+    private View overlayView;
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";
     private BootReceiver bootReceiver;
@@ -129,11 +140,14 @@ public class GPSStickyService extends Service
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
+
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
 //                gpsListener.stopLocationUpdate();
 //                gpsListener = null;
             }
         }
+
+
 
 //        gpsListener = new GPSListener(this, this);
 //
@@ -156,6 +170,13 @@ public class GPSStickyService extends Service
 
         if (isDeviceIdle){
             msg=msg+" "+isDeviceIdle;
+            Log.d(className,wakeLock.isHeld()+" WAKELOCK");
+            try {
+                Runtime.getRuntime().exec("input keyevent KEYCODE_POWER");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            //prepareSendKeys();
         }
 
         Log.i(className, "LOCATION CHANGED EVENT");
@@ -262,4 +283,53 @@ public class GPSStickyService extends Service
             Log.e(className,"Deleting a record failed!");
         }
     }
+
+    private void prepareSendKeys(){
+        Log.d(className,"PREPARING KEYS");
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+
+        // Create a transparent overlay view
+        overlayView = new View(this);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSPARENT
+        );
+        windowManager.addView(overlayView, params);
+
+
+        sendKeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_HOME);
+        sendKeyEvent(KeyEvent.ACTION_UP, KEYCODE_HOME);
+
+    }
+    private void sendKeyEvent(int action, int keyCode) {
+        if (overlayView != null) {
+            overlayView.bringToFront();
+            Log.d(className,"SENDING KEY");
+            KeyEvent event = new KeyEvent(action, keyCode);
+            overlayView.dispatchKeyEvent(event);
+        }
+    }
+
+
+        @SuppressLint("ScheduleExactAlarm")
+        public static void setExactAndAllowWhileIdleAlarm(Context context, int afterSeconds) {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+            // Create an intent for your alarm receiver
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+            // Schedule the alarm to fire at the specified time, even when the device is in idle mode
+            long alarmTimeMillis = System.currentTimeMillis() + afterSeconds * 1000L;
+
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+
+                // Log the alarm time for debugging
+                Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
+        }
 }

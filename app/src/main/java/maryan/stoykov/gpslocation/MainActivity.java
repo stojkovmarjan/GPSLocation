@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
     private final int REQUEST_PERMISSIONS_CODE = 1234;
     private final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
+    //private static final int REQUEST_OVERLAY_PERMISSION = 1236;
     private Intent serviceIntent;
     private ToggleButton toggleServiceButton;
     private EditText etUpdateInterval;
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         setServiceButtonState( isServiceRunning() );
-
+        askOverlayPermission();
         askIgnoreBatteryOptimization();
         //askForPermissions();
         toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -149,6 +150,41 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private void askOverlayPermission(){
+// Check if the app has the permission
+        if (!Settings.canDrawOverlays(this)) {
+            // Ask for the permission
+            String packageName = getPackageName();
+            //PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+
+            if (!Settings.canDrawOverlays(this)) {
+                @SuppressLint("BatteryLife")
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                intent.setData(Uri.parse("package:" + packageName));
+                overlayPermissionLauncher.launch(intent);
+            } else {
+                finish();
+            }
+        }
+    }
+    private final ActivityResultLauncher<Intent> overlayPermissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    new ActivityResultCallback<ActivityResult>() {
+                        @Override
+                        public void onActivityResult(ActivityResult result) {
+                            Log.d(className, "activity result: "+result.getResultCode());
+                            if (result.getResultCode() == Activity.RESULT_OK){
+                                askForPermissions();
+                            } else {
+                                Toast.makeText(MainActivity.this,
+                                        "Please restart the application and grant all permissions!",
+                                        Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        }
+                    }
+            );
     private void askTurnOffPowerSaver() {
 
         String packageName = getPackageName();

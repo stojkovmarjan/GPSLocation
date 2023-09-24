@@ -8,10 +8,13 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import maryan.stoykov.gpslocation.GPSStickyService;
+import maryan.stoykov.gpslocation.MainActivity;
+import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
+import maryan.stoykov.gpslocation.ShellCommandExecutor;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
-    @SuppressLint({"WakelockTimeout", "UnsafeProtectedBroadcastReceiver"})
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent serviceIntent = new Intent(context, GPSStickyService.class);
@@ -21,17 +24,26 @@ public class DeepSleepReceiver extends BroadcastReceiver {
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
         PowerManager.WakeLock wakeLock =
-                powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK,
+                powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+                                | PowerManager.ACQUIRE_CAUSES_WAKEUP,
                         "deepSleep:WakeLock");
+//        powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK |
+//                PowerManager.ACQUIRE_CAUSES_WAKEUP,
         if (isDeviceIdle){
+            Log.d("DeepSleepReceiver","DEVICE IDLE");
             wakeLock.acquire();
-
-            context.stopService(serviceIntent);
+//            NotificationBuilder.notifyForPowerSaver(context.getApplicationContext());
             serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP);
             context.startForegroundService(serviceIntent);
+//            Intent home = new Intent(Intent.ACTION_MAIN);
+//            home.addCategory(Intent.CATEGORY_HOME);
+//            home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            context.startActivity(home);
 
         } else {
             Log.d("DeepSleepReceiver","DEVICE NOT IDLE");
+
+//            NotificationBuilder.cancelNotification(context.getApplicationContext(),NotificationBuilder.POWER_SAVE_NOTIFICATION_ID);
             if (wakeLock.isHeld()) wakeLock.release();
         }
     }
