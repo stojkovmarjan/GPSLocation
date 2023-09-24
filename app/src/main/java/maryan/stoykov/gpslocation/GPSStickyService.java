@@ -46,6 +46,15 @@ public class GPSStickyService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, className+":WakeLock"
+        );
+        wakeLock.acquire();
+
+        gpsListener = new GPSListener(this, this);
+        gpsListener.requestLocation();
+
         Log.d(className,"SERVICE ON CREATE");
         bootReceiver = new BootReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
@@ -64,13 +73,6 @@ public class GPSStickyService extends Service
         registerReceiver(batteryChangedReceiver, new
                 IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-
-        wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, className+":WakeLock"
-        );
-
-        wakeLock.acquire();
     }
 
     @Override
@@ -128,14 +130,14 @@ public class GPSStickyService extends Service
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-                gpsListener.stopLocationUpdate();
-                gpsListener = null;
+//                gpsListener.stopLocationUpdate();
+//                gpsListener = null;
             }
         }
 
-        gpsListener = new GPSListener(this, this);
-
-        gpsListener.requestLocation();
+//        gpsListener = new GPSListener(this, this);
+//
+//        gpsListener.requestLocation();
 
         Log.d(className,"START");
 
@@ -148,7 +150,7 @@ public class GPSStickyService extends Service
 
     @Override
     public void onLocationSubmit(Location location, String msg) {
-
+        if (location == null) return;
         PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 

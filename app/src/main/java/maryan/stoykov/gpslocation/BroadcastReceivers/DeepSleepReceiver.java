@@ -17,20 +17,22 @@ public class DeepSleepReceiver extends BroadcastReceiver {
         Intent serviceIntent = new Intent(context, GPSStickyService.class);
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
+        PowerManager.WakeLock wakeLock =
+                powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK,
+                        "deepSleep:WakeLock");
         if (isDeviceIdle){
-            PowerManager.WakeLock wakeLock =
-                    powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                            "deepSleep:WakeLock");
             wakeLock.acquire();
+
             context.stopService(serviceIntent);
             serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP);
             context.startForegroundService(serviceIntent);
-            wakeLock.release();
+
         } else {
             Log.d("DeepSleepReceiver","DEVICE NOT IDLE");
+            if (wakeLock.isHeld()) wakeLock.release();
         }
-
     }
 }

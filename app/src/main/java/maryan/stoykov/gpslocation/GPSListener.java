@@ -66,7 +66,7 @@ public class GPSListener implements LocationListener {
         }
     };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
-
+        Log.d(className,className+" constructor");
         this.context = context;
 
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
