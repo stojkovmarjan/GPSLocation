@@ -35,7 +35,7 @@ public class NotificationBuilder {
         NotificationChannel notificationChannel = new NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_ID,
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
         );
 
         context.getSystemService(NotificationManager.class).createNotificationChannel(notificationChannel);

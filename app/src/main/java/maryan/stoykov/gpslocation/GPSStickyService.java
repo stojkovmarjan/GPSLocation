@@ -15,6 +15,7 @@ import android.graphics.PixelFormat;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -149,18 +150,27 @@ public class GPSStickyService extends Service
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
+
 //            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
+//
+//
+//                    gpsListener.stopLocationUpdate();
+//                    //gpsListener = null;
+//
 //                prepareSendKeys();
+//                Log.d(className,"STARTING RUNNABLE");
+//                startRunnable();
+//            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
+//                Log.d(className,"STOPPING RUNNABLE");
+//                gpsListener = null;
+//                gpsListener = new GPSListener(this, this);
+//
+//                stopRunnable();
+//
+//                gpsListener.requestLocation();
+//                // TODO: HERE ERROR STARTS
+//                //if (gpsListener != null) gpsListener.requestLocation();
 //            }
-            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
-                if (gpsListener != null) gpsListener.stopLocationUpdate();
-                Log.d(className,"STARTING RUNNABLE");
-                startRunnable();
-            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
-                Log.d(className,"STOPPING RUNNABLE");
-                stopRunnable();
-                if (gpsListener != null) gpsListener.requestLocation();
-            }
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
@@ -169,7 +179,6 @@ public class GPSStickyService extends Service
 //                gpsListener.stopLocationUpdate();
 //                gpsListener = null;
             }
-
 
         }
 
@@ -200,12 +209,22 @@ public class GPSStickyService extends Service
         @SuppressLint("MissingPermission")
         @Override
         public void run() {
-            Log.d(className,"RUNNABLE IS RUNNING");
-            LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
-            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
-                    GPSStickyService.this::onLocationChanged,null);
-                    //gpsListener.requestSingle();
+            Log.d(className,"RUNNABLE IS RUNNING");
+
+            LocationManager locationManager = (LocationManager)
+                    getApplicationContext().getSystemService(LOCATION_SERVICE);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    60000L,0, GPSStickyService.this);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        60000L,0, GPSStickyService.this);
+            }
+            //gpsListener.requestSingle();
+
+
             runnableHandler.postDelayed(gpsRunnable,60000);
         }
     };
@@ -220,11 +239,12 @@ public class GPSStickyService extends Service
             msg=msg+" "+isDeviceIdle;
             Log.d(className,wakeLock.isHeld()+" WAKELOCK");
 
-//            try {
-//                Runtime.getRuntime().exec("input keyevent KEYCODE_POWER");
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
+            try {
+                Log.d(className,wakeLock.isHeld()+" KEYEVENT");
+                Runtime.getRuntime().exec("input keyevent KEYCODE_BACK");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 //            prepareSendKeys();
         }
 

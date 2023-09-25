@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -66,6 +67,7 @@ public class GPSListener implements LocationListener {
         }
     };
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
+
         Log.d(className,className+" constructor");
         this.context = context;
 
@@ -76,13 +78,8 @@ public class GPSListener implements LocationListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
     }
-    @SuppressLint("MissingPermission")
-    public void requestSingle(){
-        Log.d(className,"REQUESTED SINGLE UPDATE");
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
-        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
-    }
 
+    @SuppressLint("WakelockTimeout")
     protected void requestLocation() {
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
