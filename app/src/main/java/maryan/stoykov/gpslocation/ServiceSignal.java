@@ -10,4 +10,5 @@ public class ServiceSignal {
     public static final String POWER_SAVER_IS_ON = "POWER SAVER IS ON";
     public static final String POWER_SAVER_IS_OFF = "POWER SAVER IS OFF";
     public static final String DEEP_SLEEP = "DEEP SLEEP";
+    public static final String DEVICE_ACTIVE = "DEVICE ACTIVE";
 }

@@ -76,6 +76,12 @@ public class GPSListener implements LocationListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
     }
+    @SuppressLint("MissingPermission")
+    public void requestSingle(){
+        Log.d(className,"REQUESTED SINGLE UPDATE");
+        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, null);
+        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
+    }
 
     protected void requestLocation() {
 

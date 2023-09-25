@@ -13,6 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -24,6 +27,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
@@ -39,7 +43,7 @@ import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 
 public class GPSStickyService extends Service
-        implements GPSListenerOnChange, PostLocationResponseListener {
+        implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
     private final String className = this.getClass().getSimpleName();
     private WindowManager windowManager;
     private View overlayView;
@@ -52,12 +56,15 @@ public class GPSStickyService extends Service
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
     private BatteryChangedReceiver batteryChangedReceiver;
     private PowerSaverReceiver powerSaverReceiver;
+    private Handler runnableHandler;
 
     @SuppressLint("WakelockTimeout")
     @Override
     public void onCreate() {
         super.onCreate();
+
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+
         wakeLock = powerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, className+":WakeLock"
         );
@@ -67,6 +74,7 @@ public class GPSStickyService extends Service
         gpsListener.requestLocation();
 
         Log.d(className,"SERVICE ON CREATE");
+
         bootReceiver = new BootReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
         filter.addAction(Intent.ACTION_SHUTDOWN);
@@ -91,6 +99,7 @@ public class GPSStickyService extends Service
 
         super.onDestroy();
         Log.d(className,"SERVICE ON DESTROY");
+
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
@@ -109,9 +118,10 @@ public class GPSStickyService extends Service
 
         onLocationSubmit(gpsListener.getLocation(),serviceSignalMsg);
 
-        gpsListener.stopLocationUpdate();
-
-        gpsListener = null;
+        if (gpsListener != null ){
+            gpsListener.stopLocationUpdate();
+            gpsListener = null;
+        }
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.cancel(SERVICE_NOTIFICATION_ID);
@@ -131,12 +141,26 @@ public class GPSStickyService extends Service
 
         serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
+
+
         // signal received from intent (context.startForegroundService(serviceIntent);)
         if (intent.hasExtra("SIGNAL")){
 
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
+//            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
+//                prepareSendKeys();
+//            }
+            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
+                if (gpsListener != null) gpsListener.stopLocationUpdate();
+                Log.d(className,"STARTING RUNNABLE");
+                startRunnable();
+            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
+                Log.d(className,"STOPPING RUNNABLE");
+                stopRunnable();
+                if (gpsListener != null) gpsListener.requestLocation();
+            }
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
@@ -145,6 +169,8 @@ public class GPSStickyService extends Service
 //                gpsListener.stopLocationUpdate();
 //                gpsListener = null;
             }
+
+
         }
 
 
@@ -162,6 +188,28 @@ public class GPSStickyService extends Service
         return START_STICKY;
     }
 
+    private void startRunnable() {
+        runnableHandler = new Handler();
+        gpsRunnable.run();
+    }
+    private void stopRunnable(){
+        runnableHandler.removeCallbacks(gpsRunnable);
+    }
+
+    private Runnable gpsRunnable = new Runnable() {
+        @SuppressLint("MissingPermission")
+        @Override
+        public void run() {
+            Log.d(className,"RUNNABLE IS RUNNING");
+            LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,
+                    GPSStickyService.this::onLocationChanged,null);
+                    //gpsListener.requestSingle();
+            runnableHandler.postDelayed(gpsRunnable,60000);
+        }
+    };
+
     @Override
     public void onLocationSubmit(Location location, String msg) {
         if (location == null) return;
@@ -171,12 +219,13 @@ public class GPSStickyService extends Service
         if (isDeviceIdle){
             msg=msg+" "+isDeviceIdle;
             Log.d(className,wakeLock.isHeld()+" WAKELOCK");
-            try {
-                Runtime.getRuntime().exec("input keyevent KEYCODE_POWER");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            //prepareSendKeys();
+
+//            try {
+//                Runtime.getRuntime().exec("input keyevent KEYCODE_POWER");
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            prepareSendKeys();
         }
 
         Log.i(className, "LOCATION CHANGED EVENT");
@@ -332,4 +381,10 @@ public class GPSStickyService extends Service
                 // Log the alarm time for debugging
                 Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
         }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        Log.d(className," RECEIVED FROM RUNNABLE: "+location.toString());
+        onLocationSubmit(location,"HANDLING DEVICE IDLE");
+    }
 }
