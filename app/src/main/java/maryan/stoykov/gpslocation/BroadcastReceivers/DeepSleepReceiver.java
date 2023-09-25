@@ -15,6 +15,7 @@ import maryan.stoykov.gpslocation.OneTimeAlarm;
 import maryan.stoykov.gpslocation.ServiceSignal;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
+    PowerManager.WakeLock wakeLock;
     //private Context context;
     @SuppressLint({"WakelockTimeout", "UnsafeProtectedBroadcastReceiver"})
     @Override
@@ -26,10 +27,11 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
-        PowerManager.WakeLock wakeLock =
-                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                        "deepSleep:WakeLock");
+
         if (isDeviceIdle){
+            wakeLock =
+                    powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                            "deepSleep:WakeLock");
             wakeLock.acquire();
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.SECOND, 2);
