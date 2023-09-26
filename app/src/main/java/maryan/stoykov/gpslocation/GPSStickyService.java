@@ -142,8 +142,6 @@ public class GPSStickyService extends Service
 
         serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
-
-
         // signal received from intent (context.startForegroundService(serviceIntent);)
         if (intent.hasExtra("SIGNAL")){
 
@@ -152,42 +150,27 @@ public class GPSStickyService extends Service
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
 
             if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
-                setExactAndAllowWhileIdleAlarm(this,2);
 
-//
-//                    gpsListener.stopLocationUpdate();
-//                    //gpsListener = null;
-//
-//                prepareSendKeys();
-//                Log.d(className,"STARTING RUNNABLE");
-//                startRunnable();
+                Log.d(className,"STARTING RUNNABLE");
+                gpsListener.stopLocationUpdate();
+                startRunnable();
             } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
-//                Log.d(className,"STOPPING RUNNABLE");
-//                gpsListener = null;
-//                gpsListener = new GPSListener(this, this);
-//
-//                stopRunnable();
-//
-//                gpsListener.requestLocation();
-//                // TODO: HERE ERROR STARTS
-                //if (gpsListener != null) gpsListener.requestLocation();
+                Log.d(className,"STOPPING RUNNABLE");
+
+                stopRunnable();
+                gpsListener = null;
+                gpsListener = new GPSListener(this, this);
+                gpsListener.requestLocation();
             }
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
 
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-//                gpsListener.stopLocationUpdate();
-//                gpsListener = null;
+
             }
 
         }
-
-
-
-//        gpsListener = new GPSListener(this, this);
-//
-//        gpsListener.requestLocation();
 
         Log.d(className,"START");
 
@@ -213,19 +196,8 @@ public class GPSStickyService extends Service
 
             Log.d(className,"RUNNABLE IS RUNNING");
 
-            LocationManager locationManager = (LocationManager)
-                    getApplicationContext().getSystemService(LOCATION_SERVICE);
-
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    60000L,0, GPSStickyService.this);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                        60000L,0, GPSStickyService.this);
-            }
-            //gpsListener.requestSingle();
-
-
+            gpsListener.requestSingleLocation();
+            onLocationSubmit(gpsListener.getLocation(), "IDLE MODE");
             runnableHandler.postDelayed(gpsRunnable,60000);
         }
     };
@@ -237,16 +209,8 @@ public class GPSStickyService extends Service
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
         if (isDeviceIdle){
-            msg=msg+" "+isDeviceIdle;
-            Log.d(className,wakeLock.isHeld()+" WAKELOCK");
-
-//            try {
-//                Log.d(className,wakeLock.isHeld()+" KEYEVENT");
-//                Runtime.getRuntime().exec("input keyevent KEYCODE_BACK");
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//            prepareSendKeys();
+            //msg=msg+" "+isDeviceIdle;
+            Log.d(className,wakeLock.isHeld()+" WAKELOCK"+" device idle: ");
         }
 
         Log.i(className, "LOCATION CHANGED EVENT");
@@ -313,7 +277,6 @@ public class GPSStickyService extends Service
             Log.i(className, "DB has records");
 
             locationDbRecords = dbHelper.getLocationsList();
-
         }
 
         for (LocationDbRecord locationDbRecord: locationDbRecords ) {
@@ -353,28 +316,6 @@ public class GPSStickyService extends Service
             Log.e(className,"Deleting a record failed!");
         }
     }
-
-    private void prepareSendKeys(){
-        Log.d(className,"PREPARING KEYS");
-        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-
-        // Create a transparent overlay view
-        overlayView = new View(this);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSPARENT
-        );
-        windowManager.addView(overlayView, params);
-
-
-        sendKeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_HOME);
-        sendKeyEvent(KeyEvent.ACTION_UP, KEYCODE_HOME);
-
-    }
     private void sendKeyEvent(int action, int keyCode) {
         if (overlayView != null) {
             overlayView.bringToFront();
@@ -385,24 +326,24 @@ public class GPSStickyService extends Service
     }
 
 
-        @SuppressLint("ScheduleExactAlarm")
-        public static void setExactAndAllowWhileIdleAlarm(Context context, int afterSeconds) {
-
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-            // Create an intent for your alarm receiver
-            Intent intent = new Intent(context, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-            // Schedule the alarm to fire at the specified time, even when the device is in idle mode
-            long alarmTimeMillis = System.currentTimeMillis() + afterSeconds * 1000L;
-
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
-
-                // Log the alarm time for debugging
-                Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
-        }
+//        @SuppressLint("ScheduleExactAlarm")
+//        public static void setExactAndAllowWhileIdleAlarm(Context context, int afterSeconds) {
+//
+//            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//
+//            // Create an intent for your alarm receiver
+//            Intent intent = new Intent(context, AlarmReceiver.class);
+//            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+//                    context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//
+//            // Schedule the alarm to fire at the specified time, even when the device is in idle mode
+//            long alarmTimeMillis = System.currentTimeMillis() + afterSeconds * 1000L;
+//
+//                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+//
+//                // Log the alarm time for debugging
+//                Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
+//        }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {

@@ -109,6 +109,18 @@ public class GPSListener implements LocationListener {
 
     }
 
+    @SuppressLint("MissingPermission")
+    public void requestSingleLocation(){
+
+        LocationManager locationManager = (LocationManager)
+                context.getSystemService(LOCATION_SERVICE);
+
+        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER,this,null);
+
+        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER,this,null);
+
+    }
+
     /* permission is checked in requestLocation() method before the next 3 methods are called,
     should be ok for now, ignore @SuppressLint("MissingPermission")
      */
@@ -208,7 +220,6 @@ public class GPSListener implements LocationListener {
     public void stopLocationUpdate(){
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            fusedLocationClient.flushLocations();
             fusedLocationClient.removeLocationUpdates(locationCallback);
             fusedLocationClient = null;
         } else {

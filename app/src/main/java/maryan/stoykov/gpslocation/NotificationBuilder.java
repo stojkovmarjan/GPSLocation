@@ -52,7 +52,7 @@ public class NotificationBuilder {
         Intent intent = new Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS);
         PendingIntent pendingIntent = PendingIntent.getActivity(context,
                 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        final String CHANNEL_ID = "Power saver ID";
+        final String CHANNEL_ID = "high importance notification";
 
         NotificationChannel notificationChannel = new NotificationChannel(
                 CHANNEL_ID,
@@ -64,10 +64,9 @@ public class NotificationBuilder {
                 .createNotificationChannel(notificationChannel);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder (context, CHANNEL_ID)
-                .setContentText("Seems like the battery power saver is on.\nPlease click on this notification to turn off the power saver")
-                .setContentTitle("PLEASE TURN OFF POWER SAVER!")
+                .setContentText("POWER SAVER IS ON!")
+                .setContentTitle("Please turn off the power saver!")
                 .setContentIntent(pendingIntent)
-//                .setAutoCancel(true)
                 .setSmallIcon(R.drawable.marker_24_1);
 
         NotificationManager notificationManager = (NotificationManager)

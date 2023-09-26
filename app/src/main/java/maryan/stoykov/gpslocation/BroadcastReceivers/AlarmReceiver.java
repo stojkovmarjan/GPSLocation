@@ -1,5 +1,9 @@
 package maryan.stoykov.gpslocation.BroadcastReceivers;
 
+import static androidx.core.content.ContextCompat.startActivities;
+import static androidx.core.content.ContextCompat.startActivity;
+
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +11,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.List;
 
 import maryan.stoykov.gpslocation.MainActivity;
 
@@ -23,6 +29,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 //        myAct.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //
 //        context.startActivity(myAct);
+
+
 
         mainHandler.post(new Runnable() {
             @Override

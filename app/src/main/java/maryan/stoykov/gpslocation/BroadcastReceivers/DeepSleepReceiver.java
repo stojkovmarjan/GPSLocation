@@ -8,6 +8,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import maryan.stoykov.gpslocation.GPSStickyService;
+import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
@@ -23,37 +24,37 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (powerManager.isDeviceLightIdleMode()) {
+                Log.d("DeepSleepReceiver","DEVICE LIGHT IDLE");
+            }
+        }
 
-        wakeLock =
-                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                        "deepSleep:WakeLock");
+        if (powerManager.isInteractive()){
+            Log.d("DeepSleepReceiver","DEVICE INTERACTIVE");
+        }
 
-//        powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK |
-//                PowerManager.ACQUIRE_CAUSES_WAKEUP,
+
         if (isDeviceIdle){
-
-            wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK
-                                    | PowerManager.ACQUIRE_CAUSES_WAKEUP,
-
-                            "deepSleep:WakeLock");
             Log.d("DeepSleepReceiver","DEVICE IDLE");
-           wakeLock.acquire(10000);
+//            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+//                            "deepSleep:WakeLock");
+//
+//           wakeLock.acquire(10000);
 
-//            NotificationBuilder.notifyForPowerSaver(context.getApplicationContext());
             serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP);
-            context.startForegroundService(serviceIntent);
-//            Intent home = new Intent(Intent.ACTION_MAIN);
-//            home.addCategory(Intent.CATEGORY_HOME);
-//            home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            context.startActivity(home);
 
+            context.startForegroundService(serviceIntent);
 
         } else {
             Log.d("DeepSleepReceiver","DEVICE NOT IDLE");
-            if (wakeLock.isHeld()) wakeLock.release();
+
+//            if (wakeLock.isHeld()) wakeLock.release();
+
             serviceIntent.putExtra("SIGNAL", ServiceSignal.DEVICE_ACTIVE);
             context.startForegroundService(serviceIntent);
-//            NotificationBuilder.cancelNotification(context.getApplicationContext(),NotificationBuilder.POWER_SAVE_NOTIFICATION_ID);
+
         }
     }
+
 }

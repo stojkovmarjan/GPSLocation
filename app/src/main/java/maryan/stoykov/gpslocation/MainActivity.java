@@ -69,15 +69,15 @@ public class MainActivity extends AppCompatActivity {
             Log.d(className,"CALLED DB");
         }
 
-        // Wake up phone if needed
-        if(getIntent().hasExtra("WAKE") && getIntent().getExtras().getBoolean("WAKE")) {
-            this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-        }
+//        // Wake up phone if needed
+//        if(getIntent().hasExtra("WAKE") && getIntent().getExtras().getBoolean("WAKE")) {
+//            this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+//                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+//                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+//                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+//                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+//                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+//        }
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permissions = getPermissionsForSDK33plus();
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         setServiceButtonState( isServiceRunning() );
-        askOverlayPermission();
+//        askOverlayPermission();
         askIgnoreBatteryOptimization();
         //askForPermissions();
         toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -164,41 +164,40 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void askOverlayPermission(){
-// Check if the app has the permission
-        if (!Settings.canDrawOverlays(this)) {
-            // Ask for the permission
-            String packageName = getPackageName();
-            //PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-
-            if (!Settings.canDrawOverlays(this)) {
-                @SuppressLint("BatteryLife")
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                intent.setData(Uri.parse("package:" + packageName));
-                overlayPermissionLauncher.launch(intent);
-            } else {
-                finish();
-            }
-        }
-    }
-    private final ActivityResultLauncher<Intent> overlayPermissionLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    new ActivityResultCallback<ActivityResult>() {
-                        @Override
-                        public void onActivityResult(ActivityResult result) {
-                            Log.d(className, "activity result: "+result.getResultCode());
-                            if (result.getResultCode() == Activity.RESULT_OK){
-                                askForPermissions();
-                            } else {
-                                Toast.makeText(MainActivity.this,
-                                        "Please restart the application and grant all permissions!",
-                                        Toast.LENGTH_LONG).show();
-                                finish();
-                            }
-                        }
-                    }
-            );
+//    private void askOverlayPermission(){
+//        if (!Settings.canDrawOverlays(this)) {
+//            // Ask for the permission
+//            String packageName = getPackageName();
+//            //PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+//
+//            if (!Settings.canDrawOverlays(this)) {
+//                @SuppressLint("BatteryLife")
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+//                intent.setData(Uri.parse("package:" + packageName));
+//                overlayPermissionLauncher.launch(intent);
+//            } else {
+//                finish();
+//            }
+//        }
+//    }
+//    private final ActivityResultLauncher<Intent> overlayPermissionLauncher =
+//            registerForActivityResult(
+//                    new ActivityResultContracts.StartActivityForResult(),
+//                    new ActivityResultCallback<ActivityResult>() {
+//                        @Override
+//                        public void onActivityResult(ActivityResult result) {
+//                            Log.d(className, "activity result: "+result.getResultCode());
+//                            if (result.getResultCode() == Activity.RESULT_OK){
+//                                askForPermissions();
+//                            } else {
+//                                Toast.makeText(MainActivity.this,
+//                                        "Please restart the application and grant all permissions!",
+//                                        Toast.LENGTH_LONG).show();
+//                                finish();
+//                            }
+//                        }
+//                    }
+//            );
     private void askTurnOffPowerSaver() {
 
         String packageName = getPackageName();
