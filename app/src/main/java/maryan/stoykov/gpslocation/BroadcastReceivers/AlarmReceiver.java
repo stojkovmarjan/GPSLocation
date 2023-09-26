@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import maryan.stoykov.gpslocation.MainActivity;
+
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -16,11 +18,16 @@ public class AlarmReceiver extends BroadcastReceiver {
         // This method will be called when the alarm goes off
 
         Handler mainHandler = new Handler(Looper.getMainLooper());
+//        Intent myAct = new Intent(context, MainActivity.class);
+//        myAct.putExtra("WAKE", true);
+//        myAct.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//        context.startActivity(myAct);
 
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(appContext, "Your message", Toast.LENGTH_LONG).show();
+                Toast.makeText(appContext, "", Toast.LENGTH_SHORT).show();
             }
         });
         // You can perform any additional actions here

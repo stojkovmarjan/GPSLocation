@@ -151,8 +151,9 @@ public class GPSStickyService extends Service
 
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
 
-//            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
-//
+            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
+                setExactAndAllowWhileIdleAlarm(this,2);
+
 //
 //                    gpsListener.stopLocationUpdate();
 //                    //gpsListener = null;
@@ -160,7 +161,7 @@ public class GPSStickyService extends Service
 //                prepareSendKeys();
 //                Log.d(className,"STARTING RUNNABLE");
 //                startRunnable();
-//            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
+            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
 //                Log.d(className,"STOPPING RUNNABLE");
 //                gpsListener = null;
 //                gpsListener = new GPSListener(this, this);
@@ -169,8 +170,8 @@ public class GPSStickyService extends Service
 //
 //                gpsListener.requestLocation();
 //                // TODO: HERE ERROR STARTS
-//                //if (gpsListener != null) gpsListener.requestLocation();
-//            }
+                //if (gpsListener != null) gpsListener.requestLocation();
+            }
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
@@ -239,12 +240,12 @@ public class GPSStickyService extends Service
             msg=msg+" "+isDeviceIdle;
             Log.d(className,wakeLock.isHeld()+" WAKELOCK");
 
-            try {
-                Log.d(className,wakeLock.isHeld()+" KEYEVENT");
-                Runtime.getRuntime().exec("input keyevent KEYCODE_BACK");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+//            try {
+//                Log.d(className,wakeLock.isHeld()+" KEYEVENT");
+//                Runtime.getRuntime().exec("input keyevent KEYCODE_BACK");
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
 //            prepareSendKeys();
         }
 
@@ -386,6 +387,7 @@ public class GPSStickyService extends Service
 
         @SuppressLint("ScheduleExactAlarm")
         public static void setExactAndAllowWhileIdleAlarm(Context context, int afterSeconds) {
+
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
             // Create an intent for your alarm receiver

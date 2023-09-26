@@ -8,10 +8,7 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import maryan.stoykov.gpslocation.GPSStickyService;
-import maryan.stoykov.gpslocation.MainActivity;
-import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
-import maryan.stoykov.gpslocation.ShellCommandExecutor;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
     PowerManager.WakeLock wakeLock;
@@ -26,17 +23,19 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
+
         wakeLock =
-                powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK
-                                | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deepSleep:WakeLock");
-//        wakeLock =
-//                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-//                        "deepSleep:WakeLock");
 
 //        powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK |
 //                PowerManager.ACQUIRE_CAUSES_WAKEUP,
         if (isDeviceIdle){
+
+            wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK
+                                    | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+
+                            "deepSleep:WakeLock");
             Log.d("DeepSleepReceiver","DEVICE IDLE");
            wakeLock.acquire(10000);
 
@@ -47,6 +46,7 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 //            home.addCategory(Intent.CATEGORY_HOME);
 //            home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //            context.startActivity(home);
+
 
         } else {
             Log.d("DeepSleepReceiver","DEVICE NOT IDLE");
