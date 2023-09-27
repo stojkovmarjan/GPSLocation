@@ -44,7 +44,7 @@ import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 
 public class GPSStickyService extends Service
-        implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
+        implements GPSListenerOnChange, PostLocationResponseListener {
     private final String className = this.getClass().getSimpleName();
     private WindowManager windowManager;
     private View overlayView;
@@ -348,9 +348,9 @@ public class GPSStickyService extends Service
 //                Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
 //        }
 
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        Log.d(className," RECEIVED FROM RUNNABLE: "+location.toString());
-        onLocationSubmit(location,"HANDLING DEVICE IDLE");
-    }
+//    @Override
+//    public void onLocationChanged(@NonNull Location location) {
+//        Log.d(className," RECEIVED FROM RUNNABLE: "+location.toString());
+//        onLocationSubmit(location,"HANDLING DEVICE IDLE");
+//    }
 }

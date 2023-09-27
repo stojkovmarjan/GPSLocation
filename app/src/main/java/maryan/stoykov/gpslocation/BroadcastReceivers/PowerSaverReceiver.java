@@ -19,17 +19,19 @@ public class PowerSaverReceiver extends BroadcastReceiver {
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         boolean isInteractive = powerManager.isInteractive();
         Log.d("POWER SAVER RECEIVER", "isInteractive "+isInteractive);
+
         if (DeviceStatus.isPowerSaveOn(context)){
             Log.d("POWER SAVER RECEIVER", "POWER SAVER ON");
-            NotificationBuilder.notifyForPowerSaver(context);
+//            NotificationBuilder.notifyForPowerSaver(context);
             serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_SAVER_IS_ON);
             context.startForegroundService(serviceIntent);
         }  else {
             Log.d("POWER SAVER RECEIVER", "POWER SAVER OFF");
-            NotificationBuilder.cancelNotification(
-                    context, NotificationBuilder.POWER_SAVE_NOTIFICATION_ID);
+//            NotificationBuilder.cancelNotification(
+//                    context, NotificationBuilder.POWER_SAVE_NOTIFICATION_ID);
             serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_SAVER_IS_OFF);
             context.startForegroundService(serviceIntent);
         }
+
     }
 }
