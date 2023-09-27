@@ -156,7 +156,6 @@ public class GPSStickyService extends Service
                 startRunnable();
             } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
                 Log.d(className,"STOPPING RUNNABLE");
-
                 stopRunnable();
                 gpsListener = null;
                 gpsListener = new GPSListener(this, this);
@@ -165,11 +164,8 @@ public class GPSStickyService extends Service
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
-
                 onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-
             }
-
         }
 
         Log.d(className,"START");
@@ -197,8 +193,15 @@ public class GPSStickyService extends Service
             Log.d(className,"RUNNABLE IS RUNNING");
 
             gpsListener.requestSingleLocation();
-            onLocationSubmit(gpsListener.getLocation(), "IDLE MODE");
-            runnableHandler.postDelayed(gpsRunnable,60000);
+
+            if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)) {
+                onLocationSubmit(gpsListener.getLocation(), "");
+            }
+
+            runnableHandler.postDelayed(
+                    gpsRunnable,
+                    LocationParams
+                            .getUpdateInterval(GPSStickyService.this)*1000-100L);
         }
     };
 
@@ -209,7 +212,7 @@ public class GPSStickyService extends Service
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
         if (isDeviceIdle){
-            //msg=msg+" "+isDeviceIdle;
+            msg=msg+" IDLE MODE";
             Log.d(className,wakeLock.isHeld()+" WAKELOCK"+" device idle: ");
         }
 

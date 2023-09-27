@@ -44,28 +44,11 @@ public class GPSListener implements LocationListener {
     private float minUpdateDistance = 5f;
     private Location lastGPSLocation = null;
     private Location lastNetworkLocation = null;
-    public Location getLocation(){
-        return this.location;
-    }
-    private void setLocation(Location location) {
-        this.location = location;
-    }
-
     private final GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
     private FusedLocationProviderClient fusedLocationClient;
 
     // listeners for FusedLocationProviderClient
-    private final LocationCallback locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
-            super.onLocationAvailability(locationAvailability);
-        }
-        @Override
-        public void onLocationResult(@NonNull LocationResult locationResult) {
-            setLocation(locationResult.getLastLocation());
-            gpsListenerOnChange.onLocationSubmit(locationResult.getLastLocation(),"");
-        }
-    };
+
     public GPSListener (Context context, GPSListenerOnChange gpsListenerOnChange){
 
         Log.d(className,className+" constructor");
@@ -111,7 +94,7 @@ public class GPSListener implements LocationListener {
 
     @SuppressLint("MissingPermission")
     public void requestSingleLocation(){
-
+        Log.d(className,"REQUESTING SINGLE LOCATION UPDATE");
         LocationManager locationManager = (LocationManager)
                 context.getSystemService(LOCATION_SERVICE);
 
@@ -126,18 +109,20 @@ public class GPSListener implements LocationListener {
      */
     @SuppressLint("MissingPermission")
     private void startUsingNetworkProvider(){
+        Log.d(className,"STARTING NETWORK PROVIDER");
         locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER, updateInterval, minUpdateDistance, this);
     }
     @SuppressLint("MissingPermission")
     private void startUsingGpsProvider(){
+        Log.d(className,"STARTING GPS PROVIDER");
         locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, updateInterval, minUpdateDistance, this);
     }
 
     @SuppressLint("MissingPermission")
     public void startUsingFusedProvider(){
-
+        Log.d(className,"STARTING FUSED PROVIDER");
         Log.i(className,"updateInterval "+updateInterval);
         Log.i(className,"min updateInterval "+minUpdateInterval);
         Log.i(className,"updateDistance "+minUpdateDistance);
@@ -151,6 +136,25 @@ public class GPSListener implements LocationListener {
                 .build();
 
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+    private final LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
+            super.onLocationAvailability(locationAvailability);
+        }
+        @Override
+        public void onLocationResult(@NonNull LocationResult locationResult) {
+            //setLocation(locationResult.getLastLocation());
+            location = locationResult.getLastLocation();
+            Log.d(className,"SENDING LOCATION FROM FUSED PROVIDER");
+            gpsListenerOnChange.onLocationSubmit(locationResult.getLastLocation(),"");
+        }
+    };
+    public Location getLocation(){
+        return this.location;
+    }
+    private void setLocation(Location location) {
+        this.location = location;
     }
 
     /* listener for GPS and Network provider is SDK < S

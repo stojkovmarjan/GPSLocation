@@ -69,16 +69,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(className,"CALLED DB");
         }
 
-//        // Wake up phone if needed
-//        if(getIntent().hasExtra("WAKE") && getIntent().getExtras().getBoolean("WAKE")) {
-//            this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-//                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-//                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
-//                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-//                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-//                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-//        }
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             permissions = getPermissionsForSDK33plus();
         } else {
