@@ -150,7 +150,6 @@ public class GPSStickyService extends Service
             Log.i(className,"SIGNAL: "+serviceSignalMsg);
 
             if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
-
                 Log.d(className,"STARTING RUNNABLE");
                 gpsListener.stopLocationUpdate();
                 startRunnable();
@@ -161,6 +160,7 @@ public class GPSStickyService extends Service
                 gpsListener = new GPSListener(this, this);
                 gpsListener.requestLocation();
             }
+
 
             if (gpsListener != null) {
                 Log.d(className,"GPS NOT NULL");
