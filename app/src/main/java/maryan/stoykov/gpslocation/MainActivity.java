@@ -47,7 +47,7 @@ import java.util.List;
 //@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
-    private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
+//    private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
     private final int REQUEST_PERMISSIONS_CODE = 1234;
     private final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
     //private static final int REQUEST_OVERLAY_PERMISSION = 1236;
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Log.d(className,"On create");
         try (DBHelper db = new DBHelper(this)) {
             Log.d(className,"CALLED DB");
@@ -86,10 +87,13 @@ public class MainActivity extends AppCompatActivity {
         btnApplySettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 savePreferences();
+
                 if (isServiceRunning()){
-                    startGPSService(ServiceSignal.USER_CHANGED_PARAMS);
+                    startGPSService(ServiceSignal.PARAMS_CHANGED);
                 }
+
             }
         });
 
@@ -114,15 +118,12 @@ public class MainActivity extends AppCompatActivity {
         toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
                 if ((b)) {
                     startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
                 } else {
                     stopGPSService();
                 }
-
                 setServiceButtonState(b);
-
             }
         });
     }
@@ -153,41 +154,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
-
-//    private void askOverlayPermission(){
-//        if (!Settings.canDrawOverlays(this)) {
-//            // Ask for the permission
-//            String packageName = getPackageName();
-//            //PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-//
-//            if (!Settings.canDrawOverlays(this)) {
-//                @SuppressLint("BatteryLife")
-//                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-//                intent.setData(Uri.parse("package:" + packageName));
-//                overlayPermissionLauncher.launch(intent);
-//            } else {
-//                finish();
-//            }
-//        }
-//    }
-//    private final ActivityResultLauncher<Intent> overlayPermissionLauncher =
-//            registerForActivityResult(
-//                    new ActivityResultContracts.StartActivityForResult(),
-//                    new ActivityResultCallback<ActivityResult>() {
-//                        @Override
-//                        public void onActivityResult(ActivityResult result) {
-//                            Log.d(className, "activity result: "+result.getResultCode());
-//                            if (result.getResultCode() == Activity.RESULT_OK){
-//                                askForPermissions();
-//                            } else {
-//                                Toast.makeText(MainActivity.this,
-//                                        "Please restart the application and grant all permissions!",
-//                                        Toast.LENGTH_LONG).show();
-//                                finish();
-//                            }
-//                        }
-//                    }
-//            );
     private void askTurnOffPowerSaver() {
 
         String packageName = getPackageName();

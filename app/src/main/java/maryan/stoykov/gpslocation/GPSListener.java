@@ -78,12 +78,12 @@ public class GPSListener implements LocationListener {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
         }
-
+        Log.d(className,"REQUESTING LOCATION MAIN");
         updateInterval = LocationParams.getUpdateInterval(context)*1000L;
         minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
         minUpdateDistance = LocationParams.getMinUpdateDistance(context);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
             startUsingFusedProvider();
         } else {
             startUsingNetworkProvider();
@@ -144,11 +144,16 @@ public class GPSListener implements LocationListener {
         }
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
-            //setLocation(locationResult.getLastLocation());
-            location = locationResult.getLastLocation();
+
+            setLocation(locationResult.getLastLocation());
+            //location = locationResult.getLastLocation();
             Log.d(className,"SENDING LOCATION FROM FUSED PROVIDER");
+
+            // sending location directly to the service listener (custom listener)
             gpsListenerOnChange.onLocationSubmit(locationResult.getLastLocation(),"");
+
         }
+
     };
     public Location getLocation(){
         return this.location;
@@ -214,12 +219,14 @@ public class GPSListener implements LocationListener {
 
     @Override
     public void onProviderEnabled(@NonNull String provider) {
-        LocationListener.super.onProviderEnabled(provider);
+        //LocationListener.super.onProviderEnabled(provider);
+        Log.d(className,"ENABLED PROVIDER: "+provider);
     }
 
     @Override
     public void onProviderDisabled(@NonNull String provider) {
-        LocationListener.super.onProviderDisabled(provider);
+        //LocationListener.super.onProviderDisabled(provider);
+        Log.d(className,"DISABLED PROVIDER: "+provider);
     }
     public void stopLocationUpdate(){
 

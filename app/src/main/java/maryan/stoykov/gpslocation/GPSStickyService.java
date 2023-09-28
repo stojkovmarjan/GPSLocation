@@ -1,29 +1,21 @@
 package maryan.stoykov.gpslocation;
 
-import static android.content.Context.INPUT_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
-import static android.view.KeyEvent.*;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.PixelFormat;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-import android.app.AlarmManager;
-import android.view.InputQueue;
 import android.view.KeyEvent;
-import android.hardware.input.InputManager;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -31,11 +23,10 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import maryan.stoykov.gpslocation.BroadcastReceivers.AlarmReceiver;
+import kotlin.random.Random;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
@@ -46,8 +37,6 @@ import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
     private final String className = this.getClass().getSimpleName();
-    private WindowManager windowManager;
-    private View overlayView;
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";
     private BootReceiver bootReceiver;
@@ -71,8 +60,7 @@ public class GPSStickyService extends Service
         );
         wakeLock.acquire();
 
-        gpsListener = new GPSListener(this, this);
-        gpsListener.requestLocation();
+        startGpsListener();
 
         Log.d(className,"SERVICE ON CREATE");
 
@@ -93,6 +81,16 @@ public class GPSStickyService extends Service
         registerReceiver(batteryChangedReceiver, new
                 IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
+    }
+    private void startGpsListener(){
+        gpsListener = new GPSListener(this, this);
+        gpsListener.requestLocation();
+    }
+    private void stopGpsListener(){
+        if (gpsListener != null ){
+            gpsListener.stopLocationUpdate();
+            gpsListener = null;
+        }
     }
 
     @Override
@@ -118,11 +116,8 @@ public class GPSStickyService extends Service
         serviceSignalMsg = ServiceSignal.SERVICE_STOPPED_BY_USER;
 
         onLocationSubmit(gpsListener.getLocation(),serviceSignalMsg);
-
-        if (gpsListener != null ){
-            gpsListener.stopLocationUpdate();
-            gpsListener = null;
-        }
+        
+        stopGpsListener();
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.cancel(SERVICE_NOTIFICATION_ID);
@@ -140,32 +135,34 @@ public class GPSStickyService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
+        //serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
 
         // signal received from intent (context.startForegroundService(serviceIntent);)
         if (intent.hasExtra("SIGNAL")){
 
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
-            Log.i(className,"SIGNAL: "+serviceSignalMsg);
+            Log.i(className,"RECEIVED SIGNAL: "+serviceSignalMsg);
+            processServiceSignal();
+//            if (serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
+//                Log.d(className,"STARTING RUNNABLE");
+//                // just stopping locations update from main updater method
+//                gpsListener.stopLocationUpdate();
+//                startRunnable();
+//            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
+//                Log.d(className,"STOPPING RUNNABLE");
+//                stopRunnable();
+//                // restarting gpsListener
+//                gpsListener = null;
+//                startGpsListener();
+//            }
 
-            if (serviceSignalMsg.equals(ServiceSignal.DEEP_SLEEP)){
-
-                Log.d(className,"STARTING RUNNABLE");
-                gpsListener.stopLocationUpdate();
-                startRunnable();
-            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
-                Log.d(className,"STOPPING RUNNABLE");
-                stopRunnable();
-                gpsListener = null;
-                gpsListener = new GPSListener(this, this);
-                gpsListener.requestLocation();
-            }
-
-            if (gpsListener != null) {
-                Log.d(className,"GPS NOT NULL");
-                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-            }
+//            if (gpsListener != null) {
+//                Log.d(className,"GPS NOT NULL");
+//                // sending (location and) signal
+//                // maybe we can avoid this
+////                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
+//            }
         }
 
         Log.d(className,"START");
@@ -176,7 +173,47 @@ public class GPSStickyService extends Service
         //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
+    private void processServiceSignal(){
+        switch (serviceSignalMsg){
+            case ServiceSignal.SERVICE_STARTED_BY_USER: ; break;
+            case ServiceSignal.SERVICE_STOPPED_BY_USER: ; break;
+            case ServiceSignal.SERVICE_STARTED_ON_BOOT: ; break;
+            case ServiceSignal.IDLE_MODE_STARTED:
+                Log.d(className,"STARTING RUNNABLE");
+                // just stopping locations update from main updater method
+                gpsListener.stopLocationUpdate();
+                startRunnable();
+                break;
+            case ServiceSignal.DEVICE_ACTIVE:
+                Log.d(className,"STOPPING RUNNABLE");
+                stopRunnable();
+                // restarting gpsListener
+                gpsListener = null;
+                startGpsListener();
+                break;
+            case ServiceSignal.PARAMS_CHANGED:
+                // TODO:
+                // currently when you change the parameters from the MainActivity
+                // they are not immediately applied, service has to be restarted.
+                // Will take care about this in the very near future
+                // For the future me:
+                // parameters are already saved and can we get them with LocationParams get methods!!!!!!
+                ; break;
 
+            case ServiceSignal.POWER_OFF:
+            case ServiceSignal.REBOOT:
+                break;
+            case ServiceSignal.POWER_SAVER_IS_ON: ; break;
+            case ServiceSignal.POWER_SAVER_IS_OFF: ; break;
+            default:
+                // this may duplicate location posts,
+                // but it sends the message immediately
+                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);;
+        }
+    }
+    /* the next 2 methods and the runnable are
+    relevant only when device enters idle mode
+     */
     private void startRunnable() {
         runnableHandler = new Handler();
         gpsRunnable.run();
@@ -185,16 +222,21 @@ public class GPSStickyService extends Service
         runnableHandler.removeCallbacks(gpsRunnable);
     }
 
-    private Runnable gpsRunnable = new Runnable() {
+    private final Runnable gpsRunnable = new Runnable() {
         @SuppressLint("MissingPermission")
         @Override
         public void run() {
 
             Log.d(className,"RUNNABLE IS RUNNING");
 
+            /* network and gps provider are not calling onLocationChanged(@NonNull Location location)
+             automatically and subsequently onSubmitLocation() is not triggered in the service.
+             So we need to ask for it every time */
             gpsListener.requestSingleLocation();
 
-            if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)) {
+            /* android 13 can still use fused provider, but we need to
+             take the location and send it manually to the onLocationSubmit */
+            if (!(Build.VERSION.SDK_INT > Build.VERSION_CODES.S)) {
                 onLocationSubmit(gpsListener.getLocation(), "");
             }
 
@@ -208,26 +250,26 @@ public class GPSStickyService extends Service
     @Override
     public void onLocationSubmit(Location location, String msg) {
         if (location == null) return;
+
         PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
         boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
-        if (isDeviceIdle){
-            msg=msg+" IDLE MODE";
-            Log.d(className,wakeLock.isHeld()+" WAKELOCK"+" device idle: ");
+        if (isDeviceIdle && !serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
+            Log.d(className,"device idle: "+isDeviceIdle);
+            msg="IDLE MODE "+msg;
         }
 
         Log.i(className, "LOCATION CHANGED EVENT");
 
         Log.i(className, location.toString());
 
-        if (!serviceSignalMsg.equals("")) {
-            if (!msg.equals("")) {
-                msg = serviceSignalMsg;
-            } else {
-                msg = serviceSignalMsg + ", " + msg;
-            }
-            serviceSignalMsg = "";
+        if ( !serviceSignalMsg.equals("") && msg.equals("") ) {
+            msg = serviceSignalMsg;
+        } else if (!serviceSignalMsg.equals("")) {
+            msg = serviceSignalMsg+", "+msg;
         }
+
+        serviceSignalMsg = "";
 
         DeviceStatusDbRecord deviceStatusDbRecord = new DeviceStatusDbRecord(
                 DeviceStatus.getBatteryLevel(GPSStickyService.this),
@@ -249,7 +291,6 @@ public class GPSStickyService extends Service
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
@@ -319,34 +360,6 @@ public class GPSStickyService extends Service
             Log.e(className,"Deleting a record failed!");
         }
     }
-    private void sendKeyEvent(int action, int keyCode) {
-        if (overlayView != null) {
-            overlayView.bringToFront();
-            Log.d(className,"SENDING KEY");
-            KeyEvent event = new KeyEvent(action, keyCode);
-            overlayView.dispatchKeyEvent(event);
-        }
-    }
-
-
-//        @SuppressLint("ScheduleExactAlarm")
-//        public static void setExactAndAllowWhileIdleAlarm(Context context, int afterSeconds) {
-//
-//            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//
-//            // Create an intent for your alarm receiver
-//            Intent intent = new Intent(context, AlarmReceiver.class);
-//            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-//                    context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-//
-//            // Schedule the alarm to fire at the specified time, even when the device is in idle mode
-//            long alarmTimeMillis = System.currentTimeMillis() + afterSeconds * 1000L;
-//
-//                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
-//
-//                // Log the alarm time for debugging
-//                Log.d("MY ALARM", "Alarm scheduled for: " + alarmTimeMillis);
-//        }
 
     @Override
     public void onLocationChanged(@NonNull Location location) {

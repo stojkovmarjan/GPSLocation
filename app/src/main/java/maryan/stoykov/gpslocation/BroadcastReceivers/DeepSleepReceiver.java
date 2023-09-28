@@ -42,7 +42,7 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 //
 //           wakeLock.acquire(10000);
 
-            serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP);
+            serviceIntent.putExtra("SIGNAL", ServiceSignal.IDLE_MODE_STARTED);
 
             context.startForegroundService(serviceIntent);
 

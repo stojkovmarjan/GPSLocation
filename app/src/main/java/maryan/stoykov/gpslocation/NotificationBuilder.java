@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 public class NotificationBuilder {
@@ -64,11 +65,15 @@ public class NotificationBuilder {
                 .createNotificationChannel(notificationChannel);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder (context, CHANNEL_ID)
-                .setContentText("POWER SAVER IS ON!")
-                .setContentTitle("Please turn off the power saver!")
+                //.setContentText("Please turn off the power saver!\nIt my affect location service work.")
+                .setContentTitle("POWER SAVER IS ON!")
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.marker_24_1);
 
+        // Create a BigTextStyle for multiline text
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.bigText("Please turn off the power saver! It may affect location service work.");
+        builder.setStyle(bigTextStyle);
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -77,7 +82,7 @@ public class NotificationBuilder {
         notificationManager.notify(POWER_SAVE_NOTIFICATION_ID, builder.build());
     }
 
-    public static void cancelNotification(Context context, int notificationId){
+    public static void cancelNotification(@NonNull Context context, int notificationId){
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
