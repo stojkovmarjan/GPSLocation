@@ -15,9 +15,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.WindowManager;
 
 
 import androidx.annotation.NonNull;
@@ -26,7 +23,6 @@ import androidx.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import kotlin.random.Random;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
@@ -103,13 +99,13 @@ public class GPSStickyService extends Service
             wakeLock.release();
         }
 
-        unregisterReceiver(bootReceiver);
-
         unregisterReceiver(deepSleepReceiver);
 
         unregisterReceiver(powerSaverReceiver);
 
         unregisterReceiver(batteryChangedReceiver);
+
+        unregisterReceiver(bootReceiver);
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
@@ -134,35 +130,14 @@ public class GPSStickyService extends Service
     @SuppressLint("WakelockTimeout")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        //serviceSignalMsg = ServiceSignal.SERVICE_STARTED_ON_BOOT;
-
-        // signal received from intent (context.startForegroundService(serviceIntent);)
+        //serviceSignalMsg = ServiceSignal.POWER_OFF;
         if (intent.hasExtra("SIGNAL")){
 
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
             Log.i(className,"RECEIVED SIGNAL: "+serviceSignalMsg);
             processServiceSignal();
-//            if (serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
-//                Log.d(className,"STARTING RUNNABLE");
-//                // just stopping locations update from main updater method
-//                gpsListener.stopLocationUpdate();
-//                startRunnable();
-//            } else if (serviceSignalMsg.equals(ServiceSignal.DEVICE_ACTIVE)) {
-//                Log.d(className,"STOPPING RUNNABLE");
-//                stopRunnable();
-//                // restarting gpsListener
-//                gpsListener = null;
-//                startGpsListener();
-//            }
-
-//            if (gpsListener != null) {
-//                Log.d(className,"GPS NOT NULL");
-//                // sending (location and) signal
-//                // maybe we can avoid this
-////                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);
-//            }
+            onLocationSubmit(gpsListener.getLocation(), "");
         }
 
         Log.d(className,"START");
@@ -174,10 +149,14 @@ public class GPSStickyService extends Service
         return START_STICKY;
     }
     private void processServiceSignal(){
+
         switch (serviceSignalMsg){
-            case ServiceSignal.SERVICE_STARTED_BY_USER: ; break;
-            case ServiceSignal.SERVICE_STOPPED_BY_USER: ; break;
-            case ServiceSignal.SERVICE_STARTED_ON_BOOT: ; break;
+            case ServiceSignal.SERVICE_STARTED_BY_USER:
+                ; break;
+            case ServiceSignal.SERVICE_STOPPED_BY_USER:
+                ; break;
+            case ServiceSignal.SERVICE_STARTED_ON_BOOT:
+                ; break;
             case ServiceSignal.IDLE_MODE_STARTED:
                 Log.d(className,"STARTING RUNNABLE");
                 // just stopping locations update from main updater method
@@ -198,18 +177,22 @@ public class GPSStickyService extends Service
                 // Will take care about this in the very near future
                 // For the future me:
                 // parameters are already saved and can we get them with LocationParams get methods!!!!!!
-                ; break;
-
-            case ServiceSignal.POWER_OFF:
-            case ServiceSignal.REBOOT:
                 break;
-            case ServiceSignal.POWER_SAVER_IS_ON: ; break;
-            case ServiceSignal.POWER_SAVER_IS_OFF: ; break;
+            case ServiceSignal.REBOOT:
+                Log.d(className,"REBOOT");
+                break;
+            case ServiceSignal.POWER_OFF:
+                Log.d(className,"POWER OFF");
+                break;
+            case ServiceSignal.POWER_SAVER_IS_ON:  break;
+            case ServiceSignal.POWER_SAVER_IS_OFF:  break;
             default:
                 // this may duplicate location posts,
                 // but it sends the message immediately
-                onLocationSubmit(gpsListener.getLocation(), serviceSignalMsg);;
+                Log.d(className,"DEFAULT SIGNAL CASE");
+                break;
         }
+
     }
     /* the next 2 methods and the runnable are
     relevant only when device enters idle mode

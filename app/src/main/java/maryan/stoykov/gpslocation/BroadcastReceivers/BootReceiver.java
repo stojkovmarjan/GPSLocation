@@ -34,6 +34,7 @@ public class BootReceiver extends BroadcastReceiver {
                 serviceIntent.putExtra("SIGNAL", ServiceSignal.SERVICE_STARTED_ON_BOOT);
                 context.startForegroundService(serviceIntent);
             }
+
         }
     }
 }
