@@ -78,7 +78,9 @@ public class GPSListener implements LocationListener {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
         }
+
         Log.d(className,"REQUESTING LOCATION MAIN");
+
         updateInterval = LocationParams.getUpdateInterval(context)*1000L;
         minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
         minUpdateDistance = LocationParams.getMinUpdateDistance(context);

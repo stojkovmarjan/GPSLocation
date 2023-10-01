@@ -5,12 +5,28 @@ public class LocationResponse {
     private String deviceId;
     private double latitude;
     private double longitude;
-    private int accuracy;
+    private float accuracy;
     private String provider;
     private String message;
     private int batteryLevel;
     private String timeZone;
     private int tZoneOffset;
+
+    @Override
+    public String toString() {
+        return "LocationResponse{" +
+                "time='" + time + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", accuracy=" + accuracy +
+                ", provider='" + provider + '\'' +
+                ", message='" + message + '\'' +
+                ", batteryLevel=" + batteryLevel +
+                ", timeZone='" + timeZone + '\'' +
+                ", tZoneOffset=" + tZoneOffset +
+                '}';
+    }
 
     public void setTime(String time) {
         this.time = time;
@@ -68,7 +84,7 @@ public class LocationResponse {
         return longitude;
     }
 
-    public int getAccuracy() {
+    public float getAccuracy() {
         return accuracy;
     }
 

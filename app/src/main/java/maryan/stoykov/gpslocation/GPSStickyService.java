@@ -29,6 +29,7 @@ import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.PowerSaverReceiver;
 import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
+import maryan.stoykov.gpslocation.Models.ParametersResponse;
 
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
@@ -171,12 +172,10 @@ public class GPSStickyService extends Service
                 startGpsListener();
                 break;
             case ServiceSignal.PARAMS_CHANGED:
-                // TODO:
-                // currently when you change the parameters from the MainActivity
-                // they are not immediately applied, service has to be restarted.
-                // Will take care about this in the very near future
-                // For the future me:
-                // parameters are already saved and can we get them with LocationParams get methods!!!!!!
+                Log.d(className,"PARAMS CHANGED");
+                stopGpsListener();
+                startGpsListener();
+                //serviceSignalMsg = "";
                 break;
             case ServiceSignal.REBOOT:
                 Log.d(className,"REBOOT");
@@ -232,6 +231,9 @@ public class GPSStickyService extends Service
 
     @Override
     public void onLocationSubmit(Location location, String msg) {
+
+        if (Objects.equals(serviceSignalMsg, ServiceSignal.SERVICE_STOPPED_BY_USER)) serviceSignalMsg = "";
+
         if (location == null) return;
 
         PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -276,21 +278,41 @@ public class GPSStickyService extends Service
     }
 
     @Override
-    public void onHttpResponse(int responseCode, LocationDbRecord locationDbRecord) {
+    public void onHttpResponse(int responseCode,
+                               LocationDbRecord locationDbRecord,
+                               ParametersResponse parametersResponse) {
 
         Log.i(className,"Server responded with code "+responseCode);
 
         if (responseCode >= 200 && responseCode<300){
+
+            if (parametersResponse != null){
+
+                LocationParams.savePreferences(
+                        this,
+                        parametersResponse.isStartAtBoot(),
+                        (long)parametersResponse.getUpdateInterval(),
+                        (long)parametersResponse.getMinUpdateInterval(),
+                        parametersResponse.getUpdateDistance()
+                );
+
+                serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
+                processServiceSignal();
+
+            }
 
             if (locationDbRecord.getId() > -1){
                 deleteDbRecord(locationDbRecord.getId());
             } else {
                 postDbRecords();
             }
+
+
         } else {
             Log.e(className,"ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
         }
+
     }
 
     private void postDbRecords(){

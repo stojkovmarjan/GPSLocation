@@ -4,10 +4,20 @@ public class ParametersResponse {
     private int updateInterval;
     private int minUpdateInterval;
     private int updateDistance;
-    private boolean startAtBoot;
+    private boolean startOnBoot;
 
     public int getUpdateInterval() {
         return updateInterval;
+    }
+
+    @Override
+    public String toString() {
+        return "ParametersResponse{" +
+                "updateInterval=" + updateInterval +
+                ", minUpdateInterval=" + minUpdateInterval +
+                ", updateDistance=" + updateDistance +
+                ", startAtBoot=" + startOnBoot +
+                '}';
     }
 
     public void setUpdateInterval(int updateInterval) {
@@ -31,10 +41,10 @@ public class ParametersResponse {
     }
 
     public boolean isStartAtBoot() {
-        return startAtBoot;
+        return startOnBoot;
     }
 
     public void setStartAtBoot(boolean startAtBoot) {
-        this.startAtBoot = startAtBoot;
+        this.startOnBoot = startAtBoot;
     }
 }

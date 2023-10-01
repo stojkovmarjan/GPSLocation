@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation;
 
+import android.content.Context;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -16,7 +18,7 @@ import maryan.stoykov.gpslocation.Models.LocationResponse;
 import maryan.stoykov.gpslocation.Models.ParametersResponse;
 import maryan.stoykov.gpslocation.Models.ResponseRoot;
 
-public class PostLocation {
+public class PostLocation  {
     private final String className = this.getClass().getSimpleName();
     private final String endpointURL;
     private HttpURLConnection conn;
@@ -33,7 +35,7 @@ public class PostLocation {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-
+                Looper.prepare();
                 try {
                     java.net.URL url = new URL(endpointURL);
 
@@ -52,30 +54,39 @@ public class PostLocation {
                     os.flush();
                     os.close();
 
+                    ParametersResponse parametersFromResponse = null;
+
                     if (conn.getResponseCode() == HttpURLConnection.HTTP_OK){
-                        handlePostResponseData(conn.getInputStream());
+                        parametersFromResponse = parseParametersJson(
+                                handlePostResponseData(conn.getInputStream())
+                        );
                     }
 
+                    // TODO: this line should be removed to apply response parameters
+                    //parametersFromResponse = null;
+
                     postLocationResponseListener.onHttpResponse(
-                            conn.getResponseCode(), locationDbRecord
+                            conn.getResponseCode(), locationDbRecord, parametersFromResponse
                     );
 
 
                 } catch (Exception e) {
                     e.printStackTrace();
                     postLocationResponseListener.onHttpResponse(
-                            404, locationDbRecord
+                            404, locationDbRecord, null
                     );
                 } finally {
                     conn.disconnect();
                 }
 //                return null;
+                Looper.loop();
             }
         });
         thread.start();
     }
 
-    private void handlePostResponseData(InputStream inputStream){
+    private String handlePostResponseData(InputStream inputStream){
+        String responseData = "";
         try {
             // Read and process the data from the InputStream
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -86,21 +97,21 @@ public class PostLocation {
             }
             reader.close();
 
-            // Now you can work with the response data in this method
-            String responseData = response.toString();
+            responseData = response.toString();
 
-            // Close the inputStream when you're done with it
             inputStream.close();
             Log.d(className,"Response data: "+responseData);
-            parseJson(responseData);
+
+//            parseParametersJson(responseData);
             // Further processing or handling of the responseData
         } catch (IOException e) {
             e.printStackTrace();
             // Handle exceptions here
         }
+        return responseData;
     }
 
-    private void parseJson(String jsonString){
+    private ParametersResponse parseParametersJson(String jsonString){
 
         Gson gson = new Gson();
 
@@ -110,10 +121,14 @@ public class PostLocation {
 
         ParametersResponse parametersResponse = root.getParametersResponse();
 
-        String time = locationResponse.getTime();
-        double latitude = locationResponse.getLatitude();
-        int updateInterval = parametersResponse.getUpdateInterval();
-        Log.d(className, "PARSED DATA: "+time+", "+latitude+", "+updateInterval);
+//        LocationParams.savePreferences(this,
+//                parametersResponse.isStartAtBoot(),
+//                (long) parametersResponse.getUpdateInterval(),
+//                (long)parametersResponse.getMinUpdateInterval(),
+//                parametersResponse.getUpdateDistance()
+//                );
+        Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
+        return parametersResponse;
     }
 
 }
