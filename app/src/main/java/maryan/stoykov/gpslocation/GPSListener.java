@@ -232,7 +232,7 @@ public class GPSListener implements LocationListener {
     }
     public void stopLocationUpdate(){
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
             fusedLocationClient.removeLocationUpdates(locationCallback);
             fusedLocationClient = null;
         } else {

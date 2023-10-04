@@ -44,6 +44,7 @@ public class GPSStickyService extends Service
     private BatteryChangedReceiver batteryChangedReceiver;
     private PowerSaverReceiver powerSaverReceiver;
     private Handler runnableHandler;
+    private boolean isRunnableRunning = false;
 
     @SuppressLint("WakelockTimeout")
     @Override
@@ -74,9 +75,9 @@ public class GPSStickyService extends Service
         registerReceiver(deepSleepReceiver, new
                 IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
 
-        batteryChangedReceiver = new BatteryChangedReceiver();
-        registerReceiver(batteryChangedReceiver, new
-                IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+//        batteryChangedReceiver = new BatteryChangedReceiver();
+//        registerReceiver(batteryChangedReceiver, new
+//                IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
     }
     private void startGpsListener(){
@@ -104,7 +105,7 @@ public class GPSStickyService extends Service
 
         unregisterReceiver(powerSaverReceiver);
 
-        unregisterReceiver(batteryChangedReceiver);
+        //unregisterReceiver(batteryChangedReceiver);
 
         unregisterReceiver(bootReceiver);
 
@@ -172,10 +173,17 @@ public class GPSStickyService extends Service
                 startGpsListener();
                 break;
             case ServiceSignal.PARAMS_CHANGED:
-                Log.d(className,"PARAMS CHANGED");
-                stopGpsListener();
-                startGpsListener();
-                //serviceSignalMsg = "";
+                if (!isDeviceIdle()){
+                    Log.d(className,"PARAMS CHANGED - DEVICE NOT IDLE");
+                    stopGpsListener();
+                    if (gpsListener == null){
+                        startGpsListener();
+                    }
+                } else if (isRunnableRunning && isDeviceIdle()) {
+                    Log.d(className,"PARAMS CHANGED - DEVICE IDLE");
+                    stopRunnable();
+                    startRunnable();
+                }
                 break;
             case ServiceSignal.REBOOT:
                 Log.d(className,"REBOOT");
@@ -197,18 +205,22 @@ public class GPSStickyService extends Service
     relevant only when device enters idle mode
      */
     private void startRunnable() {
-        runnableHandler = new Handler();
-        gpsRunnable.run();
+        if (!isRunnableRunning){
+            runnableHandler = new Handler();
+            gpsRunnable.run();
+        }
+
     }
     private void stopRunnable(){
         runnableHandler.removeCallbacks(gpsRunnable);
+        isRunnableRunning = false;
     }
 
     private final Runnable gpsRunnable = new Runnable() {
         @SuppressLint("MissingPermission")
         @Override
         public void run() {
-
+            isRunnableRunning = true;
             Log.d(className,"RUNNABLE IS RUNNING");
 
             /* network and gps provider are not calling onLocationChanged(@NonNull Location location)
@@ -236,11 +248,12 @@ public class GPSStickyService extends Service
 
         if (location == null) return;
 
-        PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
+//        PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+//
+//        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 
-        if (isDeviceIdle && !serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
-            Log.d(className,"device idle: "+isDeviceIdle);
+        if (isDeviceIdle() && !serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
+            Log.d(className,"device idle: "+isDeviceIdle());
             msg="IDLE MODE "+msg;
         }
 
@@ -298,7 +311,6 @@ public class GPSStickyService extends Service
 
                 serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
                 processServiceSignal();
-
             }
 
             if (locationDbRecord.getId() > -1){
@@ -370,5 +382,11 @@ public class GPSStickyService extends Service
     public void onLocationChanged(@NonNull Location location) {
         Log.d(className," RECEIVED FROM RUNNABLE: "+location.toString());
         onLocationSubmit(location,"HANDLING DEVICE IDLE");
+    }
+
+    private boolean isDeviceIdle(){
+        PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+
+        return powerManager.isDeviceIdleMode();
     }
 }

@@ -17,10 +17,10 @@ public class BatteryChangedReceiver extends BroadcastReceiver {
 
         //Intent serviceIntent = new Intent(context, GPSStickyService.class);
 
-        Log.d("BatteryChangedReceiver", "BATTERY CHANGED");
-
-        Intent serviceIntent = new Intent(context, GPSStickyService.class);
-        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+//        Log.d("BatteryChangedReceiver", "BATTERY CHANGED");
+//
+//        Intent serviceIntent = new Intent(context, GPSStickyService.class);
+//        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 //        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
 //        if (isDeviceIdle){
 //            serviceIntent.putExtra("SIGNAL", ServiceSignal.DEEP_SLEEP+" batt changed");

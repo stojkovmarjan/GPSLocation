@@ -16,8 +16,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private final String className = this.getClass().getSimpleName();
     private static final String DATABASE_NAME = "tracking.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static final String LOCATIONS_TABLE = "Locations";
+    private static final String DROP_TABLE_IF_EXISTS = "DROP TABLE IF EXISTS "+LOCATIONS_TABLE;
     private static final String CREATE_TABLE_LOCATIONS = "CREATE TABLE Locations (" +
             "Id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "DateTime TEXT NOT NULL," +
@@ -41,8 +42,11 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < newVersion){
+            db.execSQL(DROP_TABLE_IF_EXISTS);
+            db.execSQL(CREATE_TABLE_LOCATIONS);
+        }
     }
     /** @noinspection ReassignedVariable*/
     public Long addLocation(LocationDbRecord locationDbRecord){
