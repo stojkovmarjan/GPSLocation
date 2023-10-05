@@ -156,7 +156,11 @@ public class GPSStickyService extends Service
             case ServiceSignal.SERVICE_STARTED_BY_USER:
                 ; break;
             case ServiceSignal.SERVICE_STOPPED_BY_USER:
-                ; break;
+                break;
+            case ServiceSignal.STOPPED_REMOTELY:
+                Log.d(className,"NETWORK STOP SIGNAL");
+                stopSelf();
+                break;
             case ServiceSignal.SERVICE_STARTED_ON_BOOT:
                 ; break;
             case ServiceSignal.IDLE_MODE_STARTED:
@@ -248,10 +252,6 @@ public class GPSStickyService extends Service
 
         if (location == null) return;
 
-//        PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-//
-//        boolean isDeviceIdle = powerManager.isDeviceIdleMode();
-
         if (isDeviceIdle() && !serviceSignalMsg.equals(ServiceSignal.IDLE_MODE_STARTED)){
             Log.d(className,"device idle: "+isDeviceIdle());
             msg="IDLE MODE "+msg;
@@ -301,15 +301,20 @@ public class GPSStickyService extends Service
 
             if (parametersResponse != null){
 
-                LocationParams.savePreferences(
-                        this,
-                        parametersResponse.isStartAtBoot(),
-                        (long)parametersResponse.getUpdateInterval(),
-                        (long)parametersResponse.getMinUpdateInterval(),
-                        parametersResponse.getUpdateDistance()
-                );
+                if (parametersResponse.getUpdateDistance() >= 0){
+                    LocationParams.savePreferences(
+                            this,
+                            parametersResponse.isStartAtBoot(),
+                            (long)parametersResponse.getUpdateInterval(),
+                            (long)parametersResponse.getMinUpdateInterval(),
+                            parametersResponse.getUpdateDistance()
+                    );
+                    serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
 
-                serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
+                } else {
+                    serviceSignalMsg = ServiceSignal.STOPPED_REMOTELY;
+                }
+
                 processServiceSignal();
             }
 

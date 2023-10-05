@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private void askTurnOffPowerSaver() {
 
-        String packageName = getPackageName();
+        //String packageName = getPackageName();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
