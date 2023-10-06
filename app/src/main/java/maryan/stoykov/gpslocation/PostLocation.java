@@ -73,7 +73,7 @@ public class PostLocation  {
                 } catch (Exception e) {
                     e.printStackTrace();
                     postLocationResponseListener.onHttpResponse(
-                            404, locationDbRecord, null
+                            500, locationDbRecord, null
                     );
                 } finally {
                     conn.disconnect();

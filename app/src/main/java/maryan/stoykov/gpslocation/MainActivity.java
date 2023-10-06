@@ -52,11 +52,11 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
     //private static final int REQUEST_OVERLAY_PERMISSION = 1236;
     private Intent serviceIntent;
-    private ToggleButton toggleServiceButton;
-    private EditText etUpdateInterval;
-    private EditText etMinUpdateInterval;
-    private EditText etMinUpdateDistance;
-    private CheckBox checkStartAtBoot;
+//    private ToggleButton toggleServiceButton;
+//    private EditText etUpdateInterval;
+//    private EditText etMinUpdateInterval;
+//    private EditText etMinUpdateDistance;
+//    private CheckBox checkStartAtBoot;
     private String[] permissions;
 
     @SuppressLint("SetTextI18n")
@@ -66,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.d(className,"On create");
+
+        TextView tvDeviceId = findViewById(R.id.tvDeviceId);
+        
         try (DBHelper db = new DBHelper(this)) {
             Log.d(className,"CALLED DB");
         }
@@ -76,56 +79,60 @@ public class MainActivity extends AppCompatActivity {
             permissions = getPermissions();
         }
 
-        etUpdateInterval = findViewById(R.id.etUpdateInterval);
-        etMinUpdateInterval = findViewById(R.id.etMinUpdateInterval);
-        etMinUpdateDistance = findViewById(R.id.etMinUpdateDistance);
-        checkStartAtBoot = findViewById(R.id.checkStartAtBoot);
-        toggleServiceButton = findViewById(R.id.serviceButton);
-        TextView tvDeviceId = findViewById(R.id.tvDeviceId);
-        Button btnApplySettings = findViewById(R.id.btnApplySettings);
+//        etUpdateInterval = findViewById(R.id.etUpdateInterval);
+//        etMinUpdateInterval = findViewById(R.id.etMinUpdateInterval);
+//        etMinUpdateDistance = findViewById(R.id.etMinUpdateDistance);
+//        checkStartAtBoot = findViewById(R.id.checkStartAtBoot);
+//        toggleServiceButton = findViewById(R.id.serviceButton);
 
-        btnApplySettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+//        Button btnApplySettings = findViewById(R.id.btnApplySettings);
 
-                savePreferences();
+//        btnApplySettings.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//
+//
+//            }
+//        });
 
-                if (isServiceRunning()){
-                    startGPSService(ServiceSignal.PARAMS_CHANGED);
-                }
+//        savePreferences();
 
-            }
-        });
+        if (isServiceRunning()){
+            startGPSService(ServiceSignal.PARAMS_CHANGED);
+        }
 
         tvDeviceId.setText("Device Id: "+getDeviceId());
+//
+//        etUpdateInterval.setText(LocationParams.getUpdateInterval(this).toString());
+//
+//        etMinUpdateInterval.setText(LocationParams.getMinUpdateInterval(this).toString());
+//
+//        etMinUpdateDistance.setText(
+//                Float.toString(LocationParams.getMinUpdateDistance(this))
+//        );
 
-        etUpdateInterval.setText(LocationParams.getUpdateInterval(this).toString());
+//        checkStartAtBoot.setChecked(
+//                LocationParams.startServiceOnBoot(this)
+//        );
 
-        etMinUpdateInterval.setText(LocationParams.getMinUpdateInterval(this).toString());
-
-        etMinUpdateDistance.setText(
-                Float.toString(LocationParams.getMinUpdateDistance(this))
-        );
-
-        checkStartAtBoot.setChecked(
-                LocationParams.startServiceOnBoot(this)
-        );
-
-        setServiceButtonState( isServiceRunning() );
+//        setServiceButtonState( isServiceRunning() );
 //        askOverlayPermission();
         askIgnoreBatteryOptimization();
+
+//        startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
         //askForPermissions();
-        toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if ((b)) {
-                    startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
-                } else {
-                    stopGPSService();
-                }
-                setServiceButtonState(b);
-            }
-        });
+//        toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+//                if ((b)) {
+//                    startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
+//                } else {
+//                    stopGPSService();
+//                }
+//                setServiceButtonState(b);
+//            }
+//        });
     }
 
     @Override
@@ -135,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 //        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        boolean notificationsEnabled = notificationManager.areNotificationsEnabled();
 
-        setServiceButtonState( isServiceRunning() );
+//        setServiceButtonState( isServiceRunning() );
 
         Log.d(className,"ON RESUME");
     }
@@ -219,19 +226,19 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
-    private void setServiceButtonState(boolean b) {
-
-        if (b) {
-            toggleServiceButton.setChecked(true);
-            toggleServiceButton.setText("Service is ON");
-            toggleServiceButton.setTextColor(Color.GREEN);
-        } else {
-            toggleServiceButton.setText("Service is OFF");
-            toggleServiceButton.setTextColor(Color.GRAY);
-            toggleServiceButton.setChecked(false);
-        }
-
-    }
+//    private void setServiceButtonState(boolean b) {
+//
+//        if (b) {
+//            toggleServiceButton.setChecked(true);
+//            toggleServiceButton.setText("Service is ON");
+//            toggleServiceButton.setTextColor(Color.GREEN);
+//        } else {
+//            toggleServiceButton.setText("Service is OFF");
+//            toggleServiceButton.setTextColor(Color.GRAY);
+//            toggleServiceButton.setChecked(false);
+//        }
+//
+//    }
 
     private void stopGPSService() {
 
@@ -240,16 +247,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         stopService(serviceIntent);
-        setServiceButtonState(false);
+        //setServiceButtonState(false);
         serviceIntent = null;
     }
 
     private  void savePreferences(){
         LocationParams.savePreferences(this,
-                checkStartAtBoot.isChecked(),
-                Long.parseLong(String.valueOf(etUpdateInterval.getText())),
-                Long.parseLong(String.valueOf(etMinUpdateInterval.getText())),
-                Float.parseFloat(String.valueOf(etMinUpdateDistance.getText()))
+                true,
+                Long.parseLong("60"),
+                Long.parseLong("57"),
+                Float.parseFloat("0")
         );
     }
 
@@ -261,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
             serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
             serviceIntent.putExtra("SIGNAL",msg);
             startForegroundService(serviceIntent);
-            setServiceButtonState(true);
+//            setServiceButtonState(true);
         } else {
             askForPermissions();
         }
@@ -351,6 +358,7 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             } else {
                askTurnOffPowerSaver();
+               startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
             }
         }
     }

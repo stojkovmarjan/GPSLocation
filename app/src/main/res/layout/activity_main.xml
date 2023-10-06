@@ -4,132 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <ToggleButton
-        android:id="@+id/serviceButton"
-        android:layout_width="157dp"
-        android:layout_height="80dp"
-        android:textOff="Service is OFF"
-        android:textOn="Service is ON"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.863" />
+    tools:context=".MainActivity"
+    android:background="@drawable/background_1" >
 
     <TextView
         android:id="@+id/tvDeviceId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TextView"
-        android:textSize="14sp"
+        android:textColor="#7b27cf"
+        android:textSize="26sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.075" />
-
-    <EditText
-        android:id="@+id/etUpdateInterval"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="36dp"
-        android:ems="10"
-        android:inputType="number"
-        android:text="300"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/etMinUpdateInterval"
-        app:layout_constraintEnd_toEndOf="@+id/etMinUpdateInterval"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/etMinUpdateInterval" />
-
-    <EditText
-        android:id="@+id/etMinUpdateDistance"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        android:text="5"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="@+id/etMinUpdateInterval"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/etMinUpdateInterval"
-        app:layout_constraintTop_toBottomOf="@+id/etMinUpdateInterval" />
-
-    <EditText
-        android:id="@+id/etMinUpdateInterval"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="number"
-        android:text="100"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.92"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.31" />
-
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Min. update interval (sec.)"
-        app:layout_constraintBottom_toBottomOf="@+id/etMinUpdateInterval"
-        app:layout_constraintEnd_toStartOf="@+id/etMinUpdateInterval"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/etMinUpdateInterval" />
-
-    <TextView
-        android:id="@+id/textView8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update interval (sec.)"
-        app:layout_constraintBottom_toBottomOf="@+id/etUpdateInterval"
-        app:layout_constraintEnd_toStartOf="@+id/etUpdateInterval"
-        app:layout_constraintHorizontal_bias="0.71"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/etUpdateInterval"
-        app:layout_constraintVertical_bias="0.576" />
-
-    <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Min. upd. distance (meters)"
-        app:layout_constraintBottom_toBottomOf="@+id/etMinUpdateDistance"
-        app:layout_constraintEnd_toStartOf="@+id/etMinUpdateDistance"
-        app:layout_constraintHorizontal_bias="0.461"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/etMinUpdateDistance"
-        app:layout_constraintVertical_bias="0.538" />
-
-    <CheckBox
-        android:id="@+id/checkStartAtBoot"
-        android:layout_width="207dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="20dp"
-        android:checked="true"
-        android:text="Start service on boot"
-        android:textAlignment="viewStart"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnApplySettings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnApplySettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="88dp"
-        android:text="Save &amp; Apply Settings"
-        app:layout_constraintBottom_toTopOf="@+id/serviceButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintVertical_bias="0.957" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

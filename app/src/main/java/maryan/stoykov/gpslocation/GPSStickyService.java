@@ -324,10 +324,11 @@ public class GPSStickyService extends Service
                 postDbRecords();
             }
 
-
-        } else {
+        } else if (responseCode != 403) {
             Log.e(className,"ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
+        } else {
+            Log.e(className,"Device not registered on the server!");
         }
 
     }
