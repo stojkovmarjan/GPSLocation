@@ -5,58 +5,37 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Instrumentation;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Locale;
 
-//@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
+import maryan.stoykov.gpslocation.Models.ParametersResponse;
+
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
-//    private static final int REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 12345;
     private final int REQUEST_PERMISSIONS_CODE = 1234;
     private final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
-    //private static final int REQUEST_OVERLAY_PERMISSION = 1236;
     private Intent serviceIntent;
-//    private ToggleButton toggleServiceButton;
-//    private EditText etUpdateInterval;
-//    private EditText etMinUpdateInterval;
-//    private EditText etMinUpdateDistance;
-//    private CheckBox checkStartAtBoot;
     private String[] permissions;
 
     @SuppressLint("SetTextI18n")
@@ -79,91 +58,55 @@ public class MainActivity extends AppCompatActivity {
             permissions = getPermissions();
         }
 
-//        etUpdateInterval = findViewById(R.id.etUpdateInterval);
-//        etMinUpdateInterval = findViewById(R.id.etMinUpdateInterval);
-//        etMinUpdateDistance = findViewById(R.id.etMinUpdateDistance);
-//        checkStartAtBoot = findViewById(R.id.checkStartAtBoot);
-//        toggleServiceButton = findViewById(R.id.serviceButton);
 
-//        Button btnApplySettings = findViewById(R.id.btnApplySettings);
+//        if (isServiceRunning()){
+//            startGPSService(ServiceSignal.PARAMS_CHANGED);
+//        }
 
-//        btnApplySettings.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//
-//
-//            }
-//        });
+        tvDeviceId.setText("Device ID: "+getDeviceId().toUpperCase());
 
-//        savePreferences();
-
-        if (isServiceRunning()){
-            startGPSService(ServiceSignal.PARAMS_CHANGED);
-        }
-
-        tvDeviceId.setText("Device Id: "+getDeviceId());
-//
-//        etUpdateInterval.setText(LocationParams.getUpdateInterval(this).toString());
-//
-//        etMinUpdateInterval.setText(LocationParams.getMinUpdateInterval(this).toString());
-//
-//        etMinUpdateDistance.setText(
-//                Float.toString(LocationParams.getMinUpdateDistance(this))
-//        );
-
-//        checkStartAtBoot.setChecked(
-//                LocationParams.startServiceOnBoot(this)
-//        );
-
-//        setServiceButtonState( isServiceRunning() );
-//        askOverlayPermission();
         askIgnoreBatteryOptimization();
 
-//        startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
-        //askForPermissions();
-//        toggleServiceButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-//                if ((b)) {
-//                    startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
-//                } else {
-//                    stopGPSService();
-//                }
-//                setServiceButtonState(b);
-//            }
-//        });
-    }
+        // get and post location to check if device is on the list
+//        if (LocationParams.getDeviceIsRegistered(this)){
+//            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(this, ActionsActivity.class);
+//            startActivity(intent);
+//            this.finish();
+//        }
 
+    }
     @Override
     protected void onPostResume() {
         super.onPostResume();
-
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        boolean notificationsEnabled = notificationManager.areNotificationsEnabled();
-
-//        setServiceButtonState( isServiceRunning() );
-
-        Log.d(className,"ON RESUME");
     }
-
     @Override
     protected void onStart() {
         super.onStart();
     }
-
     @Override
     protected void onStop() {
         super.onStop();
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-    private void askTurnOffPowerSaver() {
 
-        //String packageName = getPackageName();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(className,"ON RESUME");
+        // get and post location to check if device is on the list
+        if (LocationParams.getDeviceIsRegistered(this)){
+            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, ActionsActivity.class);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    private void askTurnOffPowerSaver() {
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
@@ -206,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
             askForPermissions();
         }
     }
-
     private final ActivityResultLauncher<Intent> batteryOptimizationLauncher =
             registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -225,32 +167,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
     );
-
-//    private void setServiceButtonState(boolean b) {
-//
-//        if (b) {
-//            toggleServiceButton.setChecked(true);
-//            toggleServiceButton.setText("Service is ON");
-//            toggleServiceButton.setTextColor(Color.GREEN);
-//        } else {
-//            toggleServiceButton.setText("Service is OFF");
-//            toggleServiceButton.setTextColor(Color.GRAY);
-//            toggleServiceButton.setChecked(false);
-//        }
-//
-//    }
-
-    private void stopGPSService() {
-
-        if (serviceIntent == null) {
-            serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
-        }
-
-        stopService(serviceIntent);
-        //setServiceButtonState(false);
-        serviceIntent = null;
-    }
-
     private  void savePreferences(){
         LocationParams.savePreferences(this,
                 true,
@@ -259,20 +175,15 @@ public class MainActivity extends AppCompatActivity {
                 Float.parseFloat("0")
         );
     }
-
     private void startGPSService(String msg) {
-
         savePreferences();
-
         if (checkPermissions() ){
             serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
             serviceIntent.putExtra("SIGNAL",msg);
             startForegroundService(serviceIntent);
-//            setServiceButtonState(true);
         } else {
             askForPermissions();
         }
-
     }
     @SuppressLint("HardwareIds")
     private String getDeviceId(){
@@ -293,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
         // All permissions are granted
         return true;
     }
-
     // Ask for permissions if they are not granted
     public void askForPermissions() {
 
@@ -367,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private boolean isServiceRunning(){
 
-        //ActivityManager manager = ContextCompat.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {

@@ -41,7 +41,6 @@ public class GPSStickyService extends Service
     private PowerManager.WakeLock wakeLock;
     protected static final int SERVICE_NOTIFICATION_ID = 11001;
     protected static final int POWER_SAVE_NOTIFICATION_ID = 11002;
-    private BatteryChangedReceiver batteryChangedReceiver;
     private PowerSaverReceiver powerSaverReceiver;
     private Handler runnableHandler;
     private boolean isRunnableRunning = false;
@@ -75,10 +74,6 @@ public class GPSStickyService extends Service
         registerReceiver(deepSleepReceiver, new
                 IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
 
-//        batteryChangedReceiver = new BatteryChangedReceiver();
-//        registerReceiver(batteryChangedReceiver, new
-//                IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
     }
     private void startGpsListener(){
         gpsListener = new GPSListener(this, this);
@@ -104,8 +99,6 @@ public class GPSStickyService extends Service
         unregisterReceiver(deepSleepReceiver);
 
         unregisterReceiver(powerSaverReceiver);
-
-        //unregisterReceiver(batteryChangedReceiver);
 
         unregisterReceiver(bootReceiver);
 
@@ -299,6 +292,8 @@ public class GPSStickyService extends Service
 
         if (responseCode >= 200 && responseCode<300){
 
+            LocationParams.setDeviceIsRegistered(this,true);
+
             if (parametersResponse != null){
 
                 if (parametersResponse.getUpdateDistance() >= 0){
@@ -310,11 +305,9 @@ public class GPSStickyService extends Service
                             parametersResponse.getUpdateDistance()
                     );
                     serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
-
                 } else {
                     serviceSignalMsg = ServiceSignal.STOPPED_REMOTELY;
                 }
-
                 processServiceSignal();
             }
 
@@ -328,9 +321,9 @@ public class GPSStickyService extends Service
             Log.e(className,"ENDPOINT NOT AVAILABLE");
             if (locationDbRecord.getId() == -1) writeToDb(locationDbRecord);
         } else {
+            LocationParams.setDeviceIsRegistered(this,false);
             Log.e(className,"Device not registered on the server!");
         }
-
     }
 
     private void postDbRecords(){
