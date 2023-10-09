@@ -54,6 +54,7 @@ public class PostLocation  {
                     os.flush();
                     os.close();
 
+                    // TODO: here new DTO instead of only parameters response
                     ParametersResponse parametersFromResponse = null;
 
                     if (conn.getResponseCode() == HttpURLConnection.HTTP_OK){
@@ -61,9 +62,6 @@ public class PostLocation  {
                                 handlePostResponseData(conn.getInputStream())
                         );
                     }
-
-                    // TODO: this line should be removed to apply response parameters
-                    //parametersFromResponse = null;
 
                     postLocationResponseListener.onHttpResponse(
                             conn.getResponseCode(), locationDbRecord, parametersFromResponse
@@ -102,8 +100,6 @@ public class PostLocation  {
             inputStream.close();
             Log.d(className,"Response data: "+responseData);
 
-//            parseParametersJson(responseData);
-            // Further processing or handling of the responseData
         } catch (IOException e) {
             e.printStackTrace();
             // Handle exceptions here
@@ -117,18 +113,12 @@ public class PostLocation  {
 
         ResponseRoot root = gson.fromJson(jsonString, ResponseRoot.class);
 
+        // TODO: get all objects from the root and add them to the DTO object
         LocationResponse locationResponse = root.getLocationResponse();
 
         ParametersResponse parametersResponse = root.getParametersResponse();
 
-//        LocationParams.savePreferences(this,
-//                parametersResponse.isStartAtBoot(),
-//                (long) parametersResponse.getUpdateInterval(),
-//                (long)parametersResponse.getMinUpdateInterval(),
-//                parametersResponse.getUpdateDistance()
-//                );
         Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
         return parametersResponse;
     }
-
 }
