@@ -34,8 +34,6 @@ import maryan.stoykov.gpslocation.Models.ParametersResponse;
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
     private final int REQUEST_PERMISSIONS_CODE = 1234;
-    private final int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
-    private Intent serviceIntent;
     private String[] permissions;
 
     @SuppressLint("SetTextI18n")
@@ -44,9 +42,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(className,"On create");
+        Log.d(className,"ON CREATE");
 
         TextView tvDeviceId = findViewById(R.id.tvDeviceId);
+
+        tvDeviceId.setText("Device ID: "+getDeviceId().toUpperCase());
         
         try (DBHelper db = new DBHelper(this)) {
             Log.d(className,"CALLED DB");
@@ -58,23 +58,19 @@ public class MainActivity extends AppCompatActivity {
             permissions = getPermissions();
         }
 
-
-//        if (isServiceRunning()){
-//            startGPSService(ServiceSignal.PARAMS_CHANGED);
-//        }
-
-        tvDeviceId.setText("Device ID: "+getDeviceId().toUpperCase());
-
         askIgnoreBatteryOptimization();
-
-        // get and post location to check if device is on the list
-//        if (LocationParams.getDeviceIsRegistered(this)){
-//            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
-//            Intent intent = new Intent(this, ActionsActivity.class);
-//            startActivity(intent);
-//            this.finish();
-//        }
-
+        boolean isDeviceRegistered = LocationParams.getDeviceIsRegistered(this);
+        boolean isServiceRunning = isServiceRunning();
+        if (isDeviceRegistered){
+            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
+            if (isServiceRunning){
+                // here we need SERVICE_RESUMED signal maybe?
+                //startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
+                Intent intent = new Intent(this, ActionsActivity.class);
+                startActivity(intent);
+                this.finish();
+            }
+        }
     }
     @Override
     protected void onPostResume() {
@@ -97,13 +93,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(className,"ON RESUME");
-        // get and post location to check if device is on the list
-        if (LocationParams.getDeviceIsRegistered(this)){
-            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, ActionsActivity.class);
-            startActivity(intent);
-            this.finish();
-        }
+
+//        boolean isDeviceRegistered = false;
+//        Log.d(className,"ON RESUME");
+//        // get and post location to check if device is on the list
+//        isDeviceRegistered = LocationParams.getDeviceIsRegistered(this);
+//
+//        if (isDeviceRegistered){
+//            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(this, ActionsActivity.class);
+//            startActivity(intent);
+//            //this.finish();
+//        }
     }
 
     private void askTurnOffPowerSaver() {
@@ -176,9 +177,12 @@ public class MainActivity extends AppCompatActivity {
         );
     }
     private void startGPSService(String msg) {
+
         savePreferences();
+
         if (checkPermissions() ){
-            serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+            Intent serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+            Log.d(className,"CALLING START FOREGROUND SERVICE MAIN ACTIVITY");
             serviceIntent.putExtra("SIGNAL",msg);
             startForegroundService(serviceIntent);
         } else {
@@ -219,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e ("GRANT: ", "onReqPer");
 
+        int REQUEST_ACCESS_BACKGROUND_LOCATION_CODE = 1235;
         if (requestCode == REQUEST_PERMISSIONS_CODE) {
             if ( grantResults.length > 0 ) {
                 // Permission granted, proceed with using location services

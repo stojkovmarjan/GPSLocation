@@ -17,6 +17,9 @@ import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 import maryan.stoykov.gpslocation.Models.LocationResponse;
 import maryan.stoykov.gpslocation.Models.ParametersResponse;
 import maryan.stoykov.gpslocation.Models.ResponseRoot;
+import maryan.stoykov.gpslocation.Models.TrackingProfile;
+import maryan.stoykov.gpslocation.Models.WorkDays;
+import maryan.stoykov.gpslocation.Models.WorkTime;
 
 public class PostLocation  {
     private final String className = this.getClass().getSimpleName();
@@ -55,16 +58,16 @@ public class PostLocation  {
                     os.close();
 
                     // TODO: here new DTO instead of only parameters response
-                    ParametersResponse parametersFromResponse = null;
+                    ResponseRoot responseRoot = null;
 
                     if (conn.getResponseCode() == HttpURLConnection.HTTP_OK){
-                        parametersFromResponse = parseParametersJson(
+                        responseRoot = parseResponseRootJson(
                                 handlePostResponseData(conn.getInputStream())
                         );
                     }
 
                     postLocationResponseListener.onHttpResponse(
-                            conn.getResponseCode(), locationDbRecord, parametersFromResponse
+                            conn.getResponseCode(), locationDbRecord, responseRoot
                     );
 
 
@@ -107,18 +110,26 @@ public class PostLocation  {
         return responseData;
     }
 
-    private ParametersResponse parseParametersJson(String jsonString){
+    private ResponseRoot parseResponseRootJson(String jsonString){
 
         Gson gson = new Gson();
 
         ResponseRoot root = gson.fromJson(jsonString, ResponseRoot.class);
 
         // TODO: get all objects from the root and add them to the DTO object
-        LocationResponse locationResponse = root.getLocationResponse();
+        //LocationResponse locationResponse = root.getLocationResponse();
+//        String message = root.getMessage();
+//
+//        ParametersResponse parametersResponse = root.getParametersResponse();
+//
+//        TrackingProfile trackingProfile = root.getTrackingProfile();
+//
+//        WorkDays workDays = root.getWorkDays();
+//
+//        WorkTime workTime = root.getWorkTime();;
 
-        ParametersResponse parametersResponse = root.getParametersResponse();
+        //Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
 
-        Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
-        return parametersResponse;
+        return root;
     }
 }

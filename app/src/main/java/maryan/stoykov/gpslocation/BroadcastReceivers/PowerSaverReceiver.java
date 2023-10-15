@@ -12,6 +12,7 @@ import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
 
 public class PowerSaverReceiver extends BroadcastReceiver {
+    private final String className = this.getClass().getSimpleName();
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("POWER SAVER RECEIVER", "POWER SAVER CHANGED");
@@ -21,6 +22,7 @@ public class PowerSaverReceiver extends BroadcastReceiver {
         Log.d("POWER SAVER RECEIVER", "isInteractive "+isInteractive);
         if (DeviceStatus.isPowerSaveOn(context)){
             Log.d("POWER SAVER RECEIVER", "POWER SAVER ON");
+            Log.d(className,"CALLING START FOREGROUND SERVICE POWER SAVER ON");
             NotificationBuilder.notifyForPowerSaver(context);
             serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_SAVER_IS_ON);
             context.startForegroundService(serviceIntent);
@@ -28,6 +30,7 @@ public class PowerSaverReceiver extends BroadcastReceiver {
             Log.d("POWER SAVER RECEIVER", "POWER SAVER OFF");
             NotificationBuilder.cancelNotification(
                     context, NotificationBuilder.POWER_SAVE_NOTIFICATION_ID);
+            Log.d(className,"CALLING START FOREGROUND SERVICE POWER SAVER OFF");
             serviceIntent.putExtra("SIGNAL", ServiceSignal.POWER_SAVER_IS_OFF);
             context.startForegroundService(serviceIntent);
         }

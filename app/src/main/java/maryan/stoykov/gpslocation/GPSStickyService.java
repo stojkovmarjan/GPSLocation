@@ -23,13 +23,16 @@ import androidx.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import maryan.stoykov.gpslocation.BroadcastReceivers.BatteryChangedReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.BootReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.DeepSleepReceiver;
 import maryan.stoykov.gpslocation.BroadcastReceivers.PowerSaverReceiver;
 import maryan.stoykov.gpslocation.EventListeners.GPSListenerOnChange;
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 import maryan.stoykov.gpslocation.Models.ParametersResponse;
+import maryan.stoykov.gpslocation.Models.ResponseRoot;
+import maryan.stoykov.gpslocation.Models.TrackingProfile;
+import maryan.stoykov.gpslocation.Models.WorkDays;
+import maryan.stoykov.gpslocation.Models.WorkTime;
 
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
@@ -126,7 +129,8 @@ public class GPSStickyService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //serviceSignalMsg = ServiceSignal.POWER_OFF;
-        if (intent.hasExtra("SIGNAL")){
+
+        if (intent != null && intent.hasExtra("SIGNAL")){
 
             serviceSignalMsg = Objects.requireNonNull(intent.getExtras()).getString("SIGNAL");
 
@@ -286,7 +290,7 @@ public class GPSStickyService extends Service
     @Override
     public void onHttpResponse(int responseCode,
                                LocationDbRecord locationDbRecord,
-                               ParametersResponse parametersResponse) {
+                               ResponseRoot responseRoot) {
 
         Log.i(className,"Server responded with code "+responseCode);
 
@@ -294,22 +298,7 @@ public class GPSStickyService extends Service
 
             LocationParams.setDeviceIsRegistered(this,true);
 
-            if (parametersResponse != null){
-
-                if (parametersResponse.getUpdateDistance() >= 0){
-                    LocationParams.savePreferences(
-                            this,
-                            parametersResponse.isStartAtBoot(),
-                            (long)parametersResponse.getUpdateInterval(),
-                            (long)parametersResponse.getMinUpdateInterval(),
-                            parametersResponse.getUpdateDistance()
-                    );
-                    serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
-                } else {
-                    serviceSignalMsg = ServiceSignal.STOPPED_REMOTELY;
-                }
-                processServiceSignal();
-            }
+            processResponseRoot(responseRoot);
 
             if (locationDbRecord.getId() > -1){
                 deleteDbRecord(locationDbRecord.getId());
@@ -323,6 +312,41 @@ public class GPSStickyService extends Service
         } else {
             LocationParams.setDeviceIsRegistered(this,false);
             Log.e(className,"Device not registered on the server!");
+        }
+    }
+
+    void processResponseRoot(ResponseRoot responseRoot){
+        String message = responseRoot.getMessage();
+
+        ParametersResponse parametersResponse = responseRoot.getParametersResponse();
+
+        TrackingProfile trackingProfile = responseRoot.getTrackingProfile();
+
+        WorkDays workDays = responseRoot.getWorkDays();
+
+        WorkTime workTime = responseRoot.getWorkTime();
+
+        Log.d(className, "PARSED MESSAGE DATA: "+ message);
+        Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
+        Log.d(className, "PARSED TRACKING PROFILE DATA: "+ trackingProfile);
+        Log.d(className, "PARSED WORKING DAYS DATA: "+ workDays);
+        Log.d(className, "PARSED WORK TIME DATA: "+ workTime);
+
+        if (parametersResponse != null){
+
+            if (parametersResponse.getUpdateDistance() >= 0){
+                LocationParams.savePreferences(
+                        this,
+                        parametersResponse.isStartAtBoot(),
+                        (long)parametersResponse.getUpdateInterval(),
+                        (long)parametersResponse.getMinUpdateInterval(),
+                        parametersResponse.getUpdateDistance()
+                );
+                serviceSignalMsg = ServiceSignal.PARAMS_CHANGED;
+            } else {
+                serviceSignalMsg = ServiceSignal.STOPPED_REMOTELY;
+            }
+            processServiceSignal();
         }
     }
 
@@ -388,4 +412,6 @@ public class GPSStickyService extends Service
 
         return powerManager.isDeviceIdleMode();
     }
+
+
 }

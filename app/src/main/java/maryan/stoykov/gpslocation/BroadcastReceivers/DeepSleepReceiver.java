@@ -12,7 +12,8 @@ import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
-    PowerManager.WakeLock wakeLock;
+    private final String className = this.getClass().getSimpleName();
+//    PowerManager.WakeLock wakeLock;
     @SuppressLint({"UnsafeProtectedBroadcastReceiver", "WakelockTimeout"})
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,6 +42,7 @@ public class DeepSleepReceiver extends BroadcastReceiver {
 //                            "deepSleep:WakeLock");
 //
 //           wakeLock.acquire(10000);
+            Log.d(className,"CALLING START FOREGROUND SERVICE IDLE MODE STARTED");
 
             serviceIntent.putExtra("SIGNAL", ServiceSignal.IDLE_MODE_STARTED);
 
@@ -50,7 +52,7 @@ public class DeepSleepReceiver extends BroadcastReceiver {
             Log.d("DeepSleepReceiver","DEVICE NOT IDLE");
 
 //            if (wakeLock.isHeld()) wakeLock.release();
-
+            Log.d(className,"CALLING START FOREGROUND SERVICE DEV ACTIVE");
             serviceIntent.putExtra("SIGNAL", ServiceSignal.DEVICE_ACTIVE);
             context.startForegroundService(serviceIntent);
 

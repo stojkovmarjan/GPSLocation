@@ -3,6 +3,7 @@ package maryan.stoykov.gpslocation;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.TextView;
@@ -23,5 +24,12 @@ public class ActionsActivity extends AppCompatActivity {
     @SuppressLint("HardwareIds")
     private String getDeviceId(){
         return Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        //finish();
+        //System.exit(0);
     }
 }

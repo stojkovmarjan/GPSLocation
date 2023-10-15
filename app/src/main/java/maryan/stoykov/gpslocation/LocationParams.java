@@ -10,7 +10,7 @@ public class LocationParams {
     private static Long MIN_UPDATE_INTERVAL = UPDATE_INTERVAL / 3;
     private static float MIN_UPDATE_DISTANCE = 5f;
     private static boolean START_SERVICE_ON_BOOT = true;
-    private static boolean DEVICE_IS_REGISTERD = false;
+    //private boolean DEVICE_IS_REGISTERD = false;
     public static void savePreferences(Context context,
                                        boolean startAtBoot,
                                        Long updateInterval,
@@ -61,6 +61,7 @@ public class LocationParams {
     }
 
     public static void setDeviceIsRegistered(Context context, boolean isRegistered){
+
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 "location_preferences", Context.MODE_PRIVATE);
 
@@ -69,12 +70,11 @@ public class LocationParams {
         editor.putBoolean("deviceRegistered", isRegistered);
 
         editor.apply();
+
     }
     public static boolean getDeviceIsRegistered(Context context){
         SharedPreferences sharedPreferences = context.getSharedPreferences(
                 "location_preferences", Context.MODE_PRIVATE);
-        DEVICE_IS_REGISTERD = sharedPreferences.getBoolean("deviceRegistered", false);
-        return DEVICE_IS_REGISTERD;
+        return sharedPreferences.getBoolean("deviceRegistered", false);
     }
-
 }
