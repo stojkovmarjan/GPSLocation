@@ -5,11 +5,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -25,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import java.util.Locale;
 
@@ -37,11 +42,32 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSIONS_CODE = 1234;
     private String[] permissions;
 
-    @SuppressLint("SetTextI18n")
+    private final BroadcastReceiver serviceDataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals("maryan.stoykov.gpslocation.SEND_DATA")) {
+                String data = intent.getStringExtra("data");
+                // Handle the data received from the service and update your UI
+                // For example, display it in a TextView
+                Log.d(className, "SERVICE DATA RECEIVER: "+data);
+            }
+        }
+    };
+
+    @SuppressLint({"SetTextI18n", "UnspecifiedRegisterReceiverFlag"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        IntentFilter filter = new IntentFilter("maryan.stoykov.gpslocation.SEND_DATA");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(serviceDataReceiver,filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(serviceDataReceiver,filter);
+        }
 
         Log.d(className,"ON CREATE");
 
@@ -53,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(className,"CALLED DB");
         }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions = getPermissionsForSDK33plus();
         } else {
             permissions = getPermissions();
@@ -64,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         boolean isDeviceRegistered = LocationParams.getDeviceIsRegistered(this);
 
         boolean isServiceRunning = isServiceRunning();
+
 
         if (isDeviceRegistered){
             //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
@@ -92,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(serviceDataReceiver);
     }
 
     @Override

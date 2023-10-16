@@ -3,6 +3,7 @@ package maryan.stoykov.gpslocation;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -19,6 +20,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +51,7 @@ public class GPSStickyService extends Service
     private PowerSaverReceiver powerSaverReceiver;
     private Handler runnableHandler;
     private boolean isRunnableRunning = false;
+    private static final String ACTION_SEND_DATA = "maryan.stoykov.gpslocation.SEND_DATA";
 
     @SuppressLint("WakelockTimeout")
     @Override
@@ -74,9 +79,9 @@ public class GPSStickyService extends Service
                 PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
 
         deepSleepReceiver = new DeepSleepReceiver();
+
         registerReceiver(deepSleepReceiver, new
                 IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
-
     }
     private void startGpsListener(){
         gpsListener = new GPSListener(this, this);
@@ -312,6 +317,10 @@ public class GPSStickyService extends Service
         } else {
             LocationParams.setDeviceIsRegistered(this,false);
             Log.e(className,"Device not registered on the server!");
+            String data = "403";
+            Intent intent = new Intent(ACTION_SEND_DATA);
+            intent.putExtra("data", data);
+            sendBroadcast(intent);
         }
     }
 
@@ -412,6 +421,5 @@ public class GPSStickyService extends Service
 
         return powerManager.isDeviceIdleMode();
     }
-
 
 }
