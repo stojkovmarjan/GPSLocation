@@ -7,14 +7,6 @@ public class ResponseRoot {
     private TrackingProfile trackingProfile;
     private WorkDays workDays;
     private WorkTime workTime;
-    //    public LocationResponse getLocationResponse() {
-//        return locationResponse;
-//    }
-//
-//    public void setLocationResponse(LocationResponse locationResponse) {
-//        this.locationResponse = locationResponse;
-//    }
-
     public String getMessage() {
         return message;
     }

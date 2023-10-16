@@ -1,14 +1,8 @@
 package maryan.stoykov.gpslocation.Models;
 
 public class TrackingProfile {
-    //        "employeeId": "string",
-//                "companyId": "string",
-//                "companyName": "string",
-//                "geozoneId": "string",
-//                "geozoneName": "string",
-//                "startBtnEnabled": 0,
-//                "stopBtnEnabled": 0
     private String employeeId;
+    private String employeeName;
     private String companyId;
     private String companyName;
     private String geozoneId;
@@ -20,6 +14,7 @@ public class TrackingProfile {
     public String toString() {
         return "TrackingProfile{" +
                 "employeeId='" + employeeId + '\'' +
+                ", employeeName='" + employeeName + '\'' +
                 ", companyId='" + companyId + '\'' +
                 ", companyName='" + companyName + '\'' +
                 ", geozoneId='" + geozoneId + '\'' +
@@ -35,6 +30,13 @@ public class TrackingProfile {
 
     public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
+    }
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
     }
 
     public String getCompanyId() {
