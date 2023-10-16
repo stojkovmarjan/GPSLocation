@@ -1,5 +1,7 @@
 package maryan.stoykov.gpslocation.Models;
 
+import androidx.annotation.NonNull;
+
 public class WorkDays {
     private int workingMon;
     private int workingTue;
@@ -9,6 +11,7 @@ public class WorkDays {
     private int workingSat;
     private int workingSun;
 
+    @NonNull
     @Override
     public String toString() {
         return "WorkDays{" +

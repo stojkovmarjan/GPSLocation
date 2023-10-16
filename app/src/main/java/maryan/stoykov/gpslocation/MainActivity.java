@@ -30,6 +30,7 @@ import java.util.Locale;
 
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
 import maryan.stoykov.gpslocation.Models.ParametersResponse;
+import maryan.stoykov.gpslocation.Models.ResponseRoot;
 
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
@@ -59,8 +60,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         askIgnoreBatteryOptimization();
+
         boolean isDeviceRegistered = LocationParams.getDeviceIsRegistered(this);
+
         boolean isServiceRunning = isServiceRunning();
+
         if (isDeviceRegistered){
             //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
             if (isServiceRunning){
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 this.finish();
             }
         }
+
     }
     @Override
     protected void onPostResume() {
@@ -93,18 +98,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(className,"ON RESUME");
-
-//        boolean isDeviceRegistered = false;
-//        Log.d(className,"ON RESUME");
-//        // get and post location to check if device is on the list
-//        isDeviceRegistered = LocationParams.getDeviceIsRegistered(this);
-//
-//        if (isDeviceRegistered){
-//            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
-//            Intent intent = new Intent(this, ActionsActivity.class);
-//            startActivity(intent);
-//            //this.finish();
-//        }
     }
 
     private void askTurnOffPowerSaver() {
@@ -318,4 +311,5 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.INTERNET
         };
     }
+
 }
