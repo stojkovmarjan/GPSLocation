@@ -69,19 +69,8 @@ public class GPSStickyService extends Service
 
         Log.d(className,"SERVICE ON CREATE");
 
-        bootReceiver = new BootReceiver();
-        IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
-        filter.addAction(Intent.ACTION_SHUTDOWN);
-        registerReceiver(bootReceiver, filter);
+        registerReceivers();
 
-        powerSaverReceiver = new PowerSaverReceiver();
-        registerReceiver(powerSaverReceiver, new IntentFilter(
-                PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
-
-        deepSleepReceiver = new DeepSleepReceiver();
-
-        registerReceiver(deepSleepReceiver, new
-                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
     }
     private void startGpsListener(){
         gpsListener = new GPSListener(this, this);
@@ -96,19 +85,15 @@ public class GPSStickyService extends Service
 
     @Override
     public void onDestroy() {
-
         super.onDestroy();
+
         Log.d(className,"SERVICE ON DESTROY");
 
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
 
-        unregisterReceiver(deepSleepReceiver);
-
-        unregisterReceiver(powerSaverReceiver);
-
-        unregisterReceiver(bootReceiver);
+        unregisterReceivers();
 
         Log.d(className,"SERVICE STOPPED BY USER");
 
@@ -303,6 +288,8 @@ public class GPSStickyService extends Service
 
             LocationParams.setDeviceIsRegistered(this,true);
 
+            broadcastDeviceIsRegistered(true);
+
             processResponseRoot(responseRoot);
 
             if (locationDbRecord.getId() > -1){
@@ -317,11 +304,14 @@ public class GPSStickyService extends Service
         } else {
             LocationParams.setDeviceIsRegistered(this,false);
             Log.e(className,"Device not registered on the server!");
-            String data = "403";
-            Intent intent = new Intent(ACTION_SEND_DATA);
-            intent.putExtra("data", data);
-            sendBroadcast(intent);
+            broadcastDeviceIsRegistered(false);
         }
+    }
+
+    private void broadcastDeviceIsRegistered(boolean isRegistered){
+        Intent intent = new Intent(ACTION_SEND_DATA);
+        intent.putExtra("isRegistered", isRegistered);
+        sendBroadcast(intent);
     }
 
     void processResponseRoot(ResponseRoot responseRoot){
@@ -420,6 +410,28 @@ public class GPSStickyService extends Service
         PowerManager powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
         return powerManager.isDeviceIdleMode();
+    }
+    private void registerReceivers(){
+        bootReceiver = new BootReceiver();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
+        filter.addAction(Intent.ACTION_SHUTDOWN);
+        registerReceiver(bootReceiver, filter);
+
+        powerSaverReceiver = new PowerSaverReceiver();
+        registerReceiver(powerSaverReceiver, new IntentFilter(
+                PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+
+        deepSleepReceiver = new DeepSleepReceiver();
+
+        registerReceiver(deepSleepReceiver, new
+                IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
+    }
+    private void unregisterReceivers(){
+        unregisterReceiver(deepSleepReceiver);
+
+        unregisterReceiver(powerSaverReceiver);
+
+        unregisterReceiver(bootReceiver);
     }
 
 }

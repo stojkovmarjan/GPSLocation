@@ -63,7 +63,6 @@ public class DeviceStatus {
             } else {
                 return false;
             }
-
     }
 
     // Get the device's current time zone

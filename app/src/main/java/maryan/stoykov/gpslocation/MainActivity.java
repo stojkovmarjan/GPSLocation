@@ -28,14 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 
-import java.util.Locale;
-
-import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
-import maryan.stoykov.gpslocation.Models.ParametersResponse;
-import maryan.stoykov.gpslocation.Models.ResponseRoot;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private final String className = this.getClass().getSimpleName();
@@ -46,11 +40,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent.getAction().equals("maryan.stoykov.gpslocation.SEND_DATA")) {
-                String data = intent.getStringExtra("data");
-                // Handle the data received from the service and update your UI
-                // For example, display it in a TextView
-                Log.d(className, "SERVICE DATA RECEIVER: "+data);
+            if (Objects.equals(intent.getAction(), "maryan.stoykov.gpslocation.SEND_DATA")) {
+                boolean isRegistered = intent.getBooleanExtra("isRegistered", false);
+                Log.d(className, "SERVICE DATA RECEIVER: "+isRegistered);
+                if (isRegistered) {
+                    openActionsActivity();
+                }
             }
         }
     };
@@ -91,18 +86,17 @@ public class MainActivity extends AppCompatActivity {
 
         boolean isServiceRunning = isServiceRunning();
 
-
         if (isDeviceRegistered){
-            //Toast.makeText(this,"Device is registered!",Toast.LENGTH_SHORT).show();
             if (isServiceRunning){
-                // here we need SERVICE_RESUMED signal maybe?
-                //startGPSService(ServiceSignal.SERVICE_STARTED_BY_USER);
-                Intent intent = new Intent(this, ActionsActivity.class);
-                startActivity(intent);
-                this.finish();
+                openActionsActivity();
             }
         }
 
+    }
+    private void openActionsActivity(){
+        Intent intent = new Intent(this, ActionsActivity.class);
+        startActivity(intent);
+        this.finish();
     }
     @Override
     protected void onPostResume() {
@@ -231,9 +225,7 @@ public class MainActivity extends AppCompatActivity {
     }
     // Ask for permissions if they are not granted
     public void askForPermissions() {
-
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS_CODE);
-
     }
 
     @Override
@@ -286,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == REQUEST_ACCESS_BACKGROUND_LOCATION_CODE) {
             Log.i("ACCESS_BACKGROUND_LOCATION",
-                    "ACCESS_BACKGROUND_LOCATION "+String.valueOf(grantResults[0]));
+                    "ACCESS_BACKGROUND_LOCATION "+ grantResults[0]);
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this,
                         "Please restart the application and grant all permissions!",
