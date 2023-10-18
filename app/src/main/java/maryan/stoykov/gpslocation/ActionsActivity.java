@@ -1,9 +1,6 @@
 package maryan.stoykov.gpslocation;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,13 +9,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Objects;
 
 public class ActionsActivity extends AppCompatActivity {
 
     private final String className = this.getClass().getSimpleName();
+
+    private Button btnStart ;
+    private Button btnStop ;
+    private Button btnReport ;
     private final BroadcastReceiver serviceDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -30,6 +35,32 @@ public class ActionsActivity extends AppCompatActivity {
                     closeActionsActivity();
                 }
             }
+        }
+    };
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Button clickedButton = (Button) view;
+            Log.d(className,"CLICKED BUTTON "+clickedButton.getText());
+            String btnText = ""+clickedButton.getText();
+
+            Intent serviceIntent = new Intent(getApplicationContext(), GPSStickyService.class);
+            String msg = "";
+
+            switch (btnText){
+                case "START":
+                    msg = ServiceSignal.START_BUTTON_CLICKED;
+                    break;
+                case "STOP":
+                    msg = ServiceSignal.STOP_BUTTON_CLICKED;
+                    break;
+                case "REPORT":
+                    msg = ServiceSignal.REPORT_BUTTON_CLICKED;
+                    break;
+                default: break;
+            }
+            serviceIntent.putExtra("SIGNAL",msg);
+            startForegroundService(serviceIntent);
         }
     };
     @SuppressLint({"HardwareIds", "SetTextI18n", "UnspecifiedRegisterReceiverFlag"})
@@ -49,6 +80,16 @@ public class ActionsActivity extends AppCompatActivity {
         TextView tvDeviceId = findViewById(R.id.tvDeviceId);
 
         tvDeviceId.setText("Device ID: "+getDeviceId().toUpperCase());
+
+        btnStart = findViewById(R.id.btnStart);
+        btnStart.setOnClickListener(onClickListener);
+
+        btnStop = findViewById(R.id.btnStop);
+        btnStop.setOnClickListener(onClickListener);
+
+        btnReport = findViewById(R.id.btnReport);
+        btnReport.setOnClickListener(onClickListener);
+
     }
 
     private void closeActionsActivity(){

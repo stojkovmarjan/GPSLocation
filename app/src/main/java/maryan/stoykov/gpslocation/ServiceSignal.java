@@ -12,4 +12,7 @@ public class ServiceSignal {
     public static final String POWER_SAVER_IS_OFF = "POWER SAVER IS OFF";
     public static final String IDLE_MODE_STARTED = "IDLE MODE STARTED";
     public static final String DEVICE_ACTIVE = "DEVICE ACTIVE";
+    public static final String START_BUTTON_CLICKED = "START TRACKING";
+    public static final String STOP_BUTTON_CLICKED = "STOP TRACKING";
+    public static final String REPORT_BUTTON_CLICKED = "REPORT";
 }

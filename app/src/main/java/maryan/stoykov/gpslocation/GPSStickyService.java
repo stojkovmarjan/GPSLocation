@@ -164,12 +164,14 @@ public class GPSStickyService extends Service
                 startGpsListener();
                 break;
             case ServiceSignal.PARAMS_CHANGED:
+
                 if (!isDeviceIdle()){
                     Log.d(className,"PARAMS CHANGED - DEVICE NOT IDLE");
                     stopGpsListener();
                     if (gpsListener == null){
                         startGpsListener();
                     }
+
                 } else if (isRunnableRunning && isDeviceIdle()) {
                     Log.d(className,"PARAMS CHANGED - DEVICE IDLE");
                     stopRunnable();
@@ -181,6 +183,21 @@ public class GPSStickyService extends Service
                 break;
             case ServiceSignal.POWER_OFF:
                 Log.d(className,"POWER OFF");
+                break;
+            case ServiceSignal.START_BUTTON_CLICKED:
+                Log.d(className,"START TRACKING");
+                //onLocationSubmit(gpsListener.getLocation(),ServiceSignal.START_BUTTON_CLICKED);
+                //gpsListener.requestSingleLocation();
+                break;
+            case ServiceSignal.STOP_BUTTON_CLICKED:
+                Log.d(className,"STOP TRACKING");
+                //onLocationSubmit(gpsListener.getLocation(),ServiceSignal.STOP_BUTTON_CLICKED);
+                //gpsListener.requestSingleLocation();
+                break;
+            case ServiceSignal.REPORT_BUTTON_CLICKED:
+                Log.d(className,"REPORT");
+                //onLocationSubmit(gpsListener.getLocation(),ServiceSignal.REPORT_BUTTON_CLICKED);
+                //gpsListener.requestSingleLocation();
                 break;
             case ServiceSignal.POWER_SAVER_IS_ON:  break;
             case ServiceSignal.POWER_SAVER_IS_OFF:  break;
@@ -271,6 +288,7 @@ public class GPSStickyService extends Service
 
         postLocation.sendPost(locationDbRecord);
     }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

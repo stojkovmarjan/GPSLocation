@@ -21,6 +21,7 @@ public class BootReceiver extends BroadcastReceiver {
         Intent serviceIntent = new Intent(context, GPSStickyService.class);
 
         if (intent.getAction() != null) {
+            
             if (intent.getAction().equals(Intent.ACTION_REBOOT)) {
                 Log.d(className,"CALLING START FOREGROUND SERVICE REBOOT");
                 serviceIntent.putExtra("SIGNAL", ServiceSignal.REBOOT);
