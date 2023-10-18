@@ -37,7 +37,7 @@ public class ActionsActivity extends AppCompatActivity {
             }
         }
     };
-    private View.OnClickListener onClickListener = new View.OnClickListener() {
+    private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Button clickedButton = (Button) view;
