@@ -430,6 +430,7 @@ public class GPSStickyService extends Service
         return powerManager.isDeviceIdleMode();
     }
     private void registerReceivers(){
+
         bootReceiver = new BootReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_REBOOT);
         filter.addAction(Intent.ACTION_SHUTDOWN);

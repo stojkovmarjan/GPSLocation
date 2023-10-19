@@ -21,9 +21,6 @@ public class ActionsActivity extends AppCompatActivity {
 
     private final String className = this.getClass().getSimpleName();
 
-    private Button btnStart ;
-    private Button btnStop ;
-    private Button btnReport ;
     private final BroadcastReceiver serviceDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -81,13 +78,13 @@ public class ActionsActivity extends AppCompatActivity {
 
         tvDeviceId.setText("Device ID: "+getDeviceId().toUpperCase());
 
-        btnStart = findViewById(R.id.btnStart);
+        Button btnStart = findViewById(R.id.btnStart);
         btnStart.setOnClickListener(onClickListener);
 
-        btnStop = findViewById(R.id.btnStop);
+        Button btnStop = findViewById(R.id.btnStop);
         btnStop.setOnClickListener(onClickListener);
 
-        btnReport = findViewById(R.id.btnReport);
+        Button btnReport = findViewById(R.id.btnReport);
         btnReport.setOnClickListener(onClickListener);
 
     }
