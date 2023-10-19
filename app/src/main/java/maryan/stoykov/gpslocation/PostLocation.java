@@ -60,7 +60,8 @@ public class PostLocation  {
                     // TODO: here new DTO instead of only parameters response
                     ResponseRoot responseRoot = null;
 
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK){
+                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK
+                            || conn.getResponseCode() == 208){
                         responseRoot = parseResponseRootJson(
                                 handlePostResponseData(conn.getInputStream())
                         );
@@ -114,8 +115,6 @@ public class PostLocation  {
 
         Gson gson = new Gson();
 
-        ResponseRoot root = gson.fromJson(jsonString, ResponseRoot.class);
-
         // TODO: get all objects from the root and add them to the DTO object
         //LocationResponse locationResponse = root.getLocationResponse();
 //        String message = root.getMessage();
@@ -130,6 +129,6 @@ public class PostLocation  {
 
         //Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
 
-        return root;
+        return gson.fromJson(jsonString, ResponseRoot.class);
     }
 }

@@ -41,8 +41,8 @@ import maryan.stoykov.gpslocation.Models.WorkTime;
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
 
-    //private String baseAPIUrl = "https://pijo.linkpc.net/api/location";
-    private String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
+    //private final String baseAPIUrl = "https://pijo.linkpc.net/api/location";
+    private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
     private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";
