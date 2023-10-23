@@ -224,6 +224,7 @@ public class GPSStickyService extends Service
         if (isRunnableRunning){
             runnableHandler.removeCallbacks(gpsRunnable);
             isRunnableRunning = false;
+            runnableHandler = null;
         }
     }
 
