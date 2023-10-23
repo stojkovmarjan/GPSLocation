@@ -205,8 +205,6 @@ public class GPSStickyService extends Service
             case ServiceSignal.POWER_SAVER_IS_ON:  break;
             case ServiceSignal.POWER_SAVER_IS_OFF:  break;
             default:
-                // this may duplicate location posts,
-                // but it sends the message immediately
                 Log.d(className,"DEFAULT SIGNAL CASE");
                 break;
         }
@@ -223,8 +221,10 @@ public class GPSStickyService extends Service
 
     }
     private void stopRunnable(){
-        runnableHandler.removeCallbacks(gpsRunnable);
-        isRunnableRunning = false;
+        if (isRunnableRunning){
+            runnableHandler.removeCallbacks(gpsRunnable);
+            isRunnableRunning = false;
+        }
     }
 
     private final Runnable gpsRunnable = new Runnable() {
