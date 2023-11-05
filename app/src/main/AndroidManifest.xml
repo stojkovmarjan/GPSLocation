@@ -27,6 +27,9 @@
         android:theme="@style/Theme.GPSLocation"
         tools:targetApi="31">
         <activity
+            android:name=".ReportActivity"
+            android:exported="false" />
+        <activity
             android:name=".MonthActivity"
             android:exported="false" />
         <activity
