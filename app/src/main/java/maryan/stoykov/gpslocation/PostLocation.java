@@ -84,6 +84,7 @@ public class PostLocation  {
                 Looper.loop();
             }
         });
+        
         thread.start();
     }
 

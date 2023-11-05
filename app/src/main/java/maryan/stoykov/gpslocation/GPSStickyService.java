@@ -3,7 +3,6 @@ package maryan.stoykov.gpslocation;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -17,12 +16,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 import java.util.List;
 import java.util.Objects;
@@ -41,8 +36,8 @@ import maryan.stoykov.gpslocation.Models.WorkTime;
 public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
 
-    //private final String baseAPIUrl = "https://pijo.linkpc.net/api/location";
-    private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
+    private final String baseAPIUrl = "https://pijo.linkpc.net/api/location";
+    //private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
     private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";

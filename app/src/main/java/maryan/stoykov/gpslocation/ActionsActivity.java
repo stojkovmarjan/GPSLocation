@@ -20,6 +20,7 @@ import java.util.Objects;
 public class ActionsActivity extends AppCompatActivity {
 
     private final String className = this.getClass().getSimpleName();
+    private final Context context = this;
 
     private final BroadcastReceiver serviceDataReceiver = new BroadcastReceiver() {
         @Override
@@ -53,6 +54,8 @@ public class ActionsActivity extends AppCompatActivity {
                     break;
                 case "REPORT":
                     msg = ServiceSignal.REPORT_BUTTON_CLICKED;
+                    Intent intent = new Intent( context, MonthActivity.class);
+                    startActivity(intent);
                     break;
                 default: break;
             }

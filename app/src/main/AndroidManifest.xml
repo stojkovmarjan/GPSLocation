@@ -27,6 +27,9 @@
         android:theme="@style/Theme.GPSLocation"
         tools:targetApi="31">
         <activity
+            android:name=".MonthActivity"
+            android:exported="false" />
+        <activity
             android:name=".ActionsActivity"
             android:exported="false"
             android:screenOrientation="portrait"
@@ -36,7 +39,6 @@
             android:exported="true"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
