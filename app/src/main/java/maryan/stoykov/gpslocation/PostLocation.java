@@ -1,8 +1,9 @@
 package maryan.stoykov.gpslocation;
 
-import android.content.Context;
 import android.os.Looper;
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,15 +12,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import com.google.gson.Gson;
 
 import maryan.stoykov.gpslocation.EventListeners.PostLocationResponseListener;
-import maryan.stoykov.gpslocation.Models.LocationResponse;
-import maryan.stoykov.gpslocation.Models.ParametersResponse;
 import maryan.stoykov.gpslocation.Models.ResponseRoot;
-import maryan.stoykov.gpslocation.Models.TrackingProfile;
-import maryan.stoykov.gpslocation.Models.WorkDays;
-import maryan.stoykov.gpslocation.Models.WorkTime;
 
 public class PostLocation  {
     private final String className = this.getClass().getSimpleName();

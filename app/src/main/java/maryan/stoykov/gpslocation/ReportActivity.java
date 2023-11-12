@@ -1,7 +1,5 @@
 package maryan.stoykov.gpslocation;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -9,10 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.time.YearMonth;
-import java.util.Calendar;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class ReportActivity extends AppCompatActivity {
 

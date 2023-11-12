@@ -3,8 +3,6 @@ package maryan.stoykov.gpslocation;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import maryan.stoykov.gpslocation.Models.ParametersResponse;
-
 public class LocationParams {
     private static Long UPDATE_INTERVAL = 5L;
     private static Long MIN_UPDATE_INTERVAL = UPDATE_INTERVAL / 3;

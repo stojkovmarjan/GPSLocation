@@ -8,7 +8,6 @@ import android.os.PowerManager;
 import android.util.Log;
 
 import maryan.stoykov.gpslocation.GPSStickyService;
-import maryan.stoykov.gpslocation.NotificationBuilder;
 import maryan.stoykov.gpslocation.ServiceSignal;
 
 public class DeepSleepReceiver extends BroadcastReceiver {
