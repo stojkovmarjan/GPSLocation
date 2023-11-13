@@ -44,7 +44,7 @@ public class GPSListener implements LocationListener {
     private Location lastGPSLocation = null;
     private Location lastNetworkLocation = null;
     private final GPSListenerOnChange gpsListenerOnChange; // event listener ( for sticky service only for now)
-    private FusedLocationProviderClient fusedLocationClient;
+    //private FusedLocationProviderClient fusedLocationClient;
 
     // listeners for FusedLocationProviderClient
 
@@ -57,7 +57,7 @@ public class GPSListener implements LocationListener {
 
         this.gpsListenerOnChange = gpsListenerOnChange; // event emitter / listener
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        //fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
 
     }
 
@@ -84,12 +84,15 @@ public class GPSListener implements LocationListener {
         minUpdateInterval = LocationParams.getMinUpdateInterval(context)*1000L;
         minUpdateDistance = LocationParams.getMinUpdateDistance(context);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
-            startUsingFusedProvider();
-        } else {
-            startUsingNetworkProvider();
-            startUsingGpsProvider();
-        }
+//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
+//            startUsingFusedProvider();
+//        } else {
+//            startUsingNetworkProvider();
+//            startUsingGpsProvider();
+//        }
+
+        startUsingNetworkProvider();
+        startUsingGpsProvider();
 
     }
 
@@ -121,23 +124,23 @@ public class GPSListener implements LocationListener {
                 LocationManager.GPS_PROVIDER, updateInterval, minUpdateDistance, this);
     }
 
-    @SuppressLint("MissingPermission")
-    public void startUsingFusedProvider(){
-        Log.d(className,"STARTING FUSED PROVIDER");
-        Log.i(className,"updateInterval "+updateInterval);
-        Log.i(className,"min updateInterval "+minUpdateInterval);
-        Log.i(className,"updateDistance "+minUpdateDistance);
-
-        LocationRequest locationRequest = new LocationRequest.Builder(updateInterval)
-                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setMinUpdateIntervalMillis(minUpdateInterval-3000)
-                .setMinUpdateDistanceMeters(minUpdateDistance)
-                .setGranularity(Granularity.GRANULARITY_FINE)
-                .setMaxUpdateDelayMillis(0)
-                .build();
-
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-    }
+//    @SuppressLint("MissingPermission")
+//    public void startUsingFusedProvider(){
+//        Log.d(className,"STARTING FUSED PROVIDER");
+//        Log.i(className,"updateInterval "+updateInterval);
+//        Log.i(className,"min updateInterval "+minUpdateInterval);
+//        Log.i(className,"updateDistance "+minUpdateDistance);
+//
+//        LocationRequest locationRequest = new LocationRequest.Builder(updateInterval)
+//                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+//                .setMinUpdateIntervalMillis(minUpdateInterval-3000)
+//                .setMinUpdateDistanceMeters(minUpdateDistance)
+//                .setGranularity(Granularity.GRANULARITY_FINE)
+//                .setMaxUpdateDelayMillis(0)
+//                .build();
+//
+//        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+//    }
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
@@ -231,11 +234,12 @@ public class GPSListener implements LocationListener {
     }
     public void stopLocationUpdate(){
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-            fusedLocationClient = null;
-        } else {
-            locationManager.removeUpdates(this);
-        }
+//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S){
+//            fusedLocationClient.removeLocationUpdates(locationCallback);
+//            fusedLocationClient = null;
+//        } else {
+//            locationManager.removeUpdates(this);
+//        }
+        locationManager.removeUpdates(this);
     }
 }

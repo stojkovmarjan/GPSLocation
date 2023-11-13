@@ -32,6 +32,7 @@ public class ReportActivity extends AppCompatActivity {
         tvDeviceId.setText("Device ID: "+deviceId.toUpperCase());
 
         btnClose = findViewById(R.id.btnClose);
+
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
