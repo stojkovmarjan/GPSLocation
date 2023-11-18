@@ -284,6 +284,7 @@ public class GPSStickyService extends Service
         PostLocation postLocation = new PostLocation(baseAPIUrl, GPSStickyService.this);
 
         postLocation.sendPost(locationDbRecord);
+
     }
 
     @Nullable
