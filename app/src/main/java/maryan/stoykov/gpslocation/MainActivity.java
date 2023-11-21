@@ -42,10 +42,13 @@ public class MainActivity extends AppCompatActivity {
 
             if (Objects.equals(intent.getAction(), "maryan.stoykov.gpslocation.SEND_DATA")) {
                 boolean isRegistered = intent.getBooleanExtra("isRegistered", false);
+
                 Log.d(className, "SERVICE DATA RECEIVER: "+isRegistered);
+
                 if (isRegistered) {
                     openActionsActivity();
                 }
+
             }
         }
     };

@@ -59,6 +59,7 @@ public class MonthActivity extends AppCompatActivity implements AdapterView.OnIt
             Intent intent = new Intent(this, ReportActivity.class);
             intent.putExtra("Month",position);
             startActivity(intent);
+            this.finish();
         }
 
     }
