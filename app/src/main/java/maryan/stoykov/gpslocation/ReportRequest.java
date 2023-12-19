@@ -31,6 +31,7 @@ public class ReportRequest {
     public void sendRequest(String deviceId, int month){
         String baseUrl = "https://izzihr.schweizerweb.com/api/reports/device/";
         //String baseUrl = "https://pijo.linkpc.net/api/location/";
+        //String baseUrl = "http://localhost:3000/api/reports/device/";
         String urlString = baseUrl +deviceId+"/"+month;
         //Log.d("REQUEST REPORT","SEND REQUEST");
         Thread thread = new Thread(new Runnable() {

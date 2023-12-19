@@ -1,6 +1,8 @@
 package maryan.stoykov.gpslocation.Models;
 
-public class TrackingProfile {
+import java.io.Serializable;
+
+public class TrackingProfile implements Serializable {
     private String employeeId;
     private String employeeName;
     private String companyId;

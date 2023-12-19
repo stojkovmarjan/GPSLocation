@@ -38,6 +38,7 @@ public class GPSStickyService extends Service
 
     //private final String baseAPIUrl = "https://pijo.linkpc.net/api/location";
     private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
+    //private final String baseAPIUrl = "http://localhost:3000/api/trackings/create";
     private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
     private String serviceSignalMsg = "";
@@ -139,7 +140,7 @@ public class GPSStickyService extends Service
 
         switch (serviceSignalMsg){
             case ServiceSignal.SERVICE_STARTED_BY_USER:
-                ; break;
+                break;
             case ServiceSignal.SERVICE_STOPPED_BY_USER:
                 break;
             case ServiceSignal.STOPPED_REMOTELY:
@@ -147,7 +148,7 @@ public class GPSStickyService extends Service
                 stopSelf();
                 break;
             case ServiceSignal.SERVICE_STARTED_ON_BOOT:
-                ; break;
+                break;
             case ServiceSignal.IDLE_MODE_STARTED:
                 Log.d(className,"STARTING RUNNABLE");
                 // just stopping locations update from main updater method
@@ -341,6 +342,8 @@ public class GPSStickyService extends Service
 
         WorkTime workTime = responseRoot.getWorkTime();
 
+        broadcastTrackingProfile(trackingProfile);
+
         Log.d(className, "PARSED MESSAGE DATA: "+ message);
         Log.d(className, "PARSED PARAMETERS DATA: "+ parametersResponse);
         Log.d(className, "PARSED TRACKING PROFILE DATA: "+ trackingProfile);
@@ -448,6 +451,11 @@ public class GPSStickyService extends Service
         unregisterReceiver(powerSaverReceiver);
 
         unregisterReceiver(bootReceiver);
+    }
+    private void broadcastTrackingProfile(TrackingProfile trackingProfile) {
+        Intent intent = new Intent("maryan.stoykov.gpslocation.TRACKING_PROFILE");
+        intent.putExtra("trackingProfile", trackingProfile);
+        sendBroadcast(intent);
     }
 
 }
