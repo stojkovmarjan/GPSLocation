@@ -29,7 +29,8 @@ public class ReportRequest {
         this.reportRequestResponseListener = reportRequestResponseListener;
     }
     public void sendRequest(String deviceId, int month){
-        String baseUrl = "https://izzihr.schweizerweb.com/api/reports/device/";
+        //String baseUrl = "https://izzihr.schweizerweb.com/api/reports/device/";
+        String baseUrl = "https://izzihrv2.schweizerweb.com/api/reports/device/";
         //String baseUrl = "https://pijo.linkpc.net/api/location/";
         //String baseUrl = "http://localhost:3000/api/reports/device/";
         String urlString = baseUrl +deviceId+"/"+month;

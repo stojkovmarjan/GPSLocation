@@ -37,7 +37,8 @@ public class GPSStickyService extends Service
         implements GPSListenerOnChange, PostLocationResponseListener, LocationListener {
 
     //private final String baseAPIUrl = "https://pijo.linkpc.net/api/location";
-    private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
+    // private final String baseAPIUrl = "https://izzihr.schweizerweb.com/api/trackings/create";
+    private final String baseAPIUrl = "https://izzihrv2.schweizerweb.com/api/trackings/create";
     //private final String baseAPIUrl = "http://localhost:3000/api/trackings/create";
     private final String className = this.getClass().getSimpleName();
     private GPSListener gpsListener;
